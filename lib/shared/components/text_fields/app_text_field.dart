@@ -3,23 +3,43 @@ import 'package:flutter/material.dart';
 class AppTextField extends StatelessWidget {
   const AppTextField({
     super.key,
-    required this.label,
-    this.controller,
+    required this.controller,
+    this.label,
+    this.hint,
+    this.validator,
     this.keyboardType,
+    this.suffixText,
+    this.prefixIcon,
+    this.obscureText = false,
+    this.maxLines = 1,
   });
 
-  final String label;
-  final TextEditingController? controller;
+  final TextEditingController controller;
+  final String? label;
+  final String? hint;
+  final String? suffixText;
+  final Widget? prefixIcon;
+  final String? Function(String?)? validator;
   final TextInputType? keyboardType;
+  final bool obscureText;
+  final int maxLines;
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
       controller: controller,
+      validator: validator,
       keyboardType: keyboardType,
+      obscureText: obscureText,
+      maxLines: maxLines,
       decoration: InputDecoration(
         labelText: label,
-        border: const OutlineInputBorder(),
+        hintText: hint,
+        suffixText: suffixText,
+        prefixIcon: prefixIcon,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
       ),
     );
   }
