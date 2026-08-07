@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:go_router/go_router.dart';
 import '../../providers/dashboard_provider.dart';
 import '../widgets/account_title.dart';
 import '../widgets/balance_card.dart';
@@ -52,6 +52,12 @@ class DashboardPage extends ConsumerWidget {
             ],
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.push('/add-transaction');
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
