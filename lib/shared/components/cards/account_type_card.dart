@@ -18,14 +18,14 @@ class AccountTypeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
+    final colors = Theme.of(context).colorScheme;
 
     return Card(
       elevation: selected ? 3 : 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: selected ? color.primary : color.outlineVariant,
+          color: selected ? colors.primary : colors.outlineVariant,
           width: selected ? 2 : 1,
         ),
       ),
@@ -38,8 +38,8 @@ class AccountTypeCard extends StatelessWidget {
             children: [
               Icon(
                 icon,
+                color: colors.primary,
                 size: 32,
-                color: color.primary,
               ),
 
               const SizedBox(width: 16),
@@ -52,9 +52,7 @@ class AccountTypeCard extends StatelessWidget {
                       title,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-
                     const SizedBox(height: 4),
-
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall,
@@ -66,7 +64,7 @@ class AccountTypeCard extends StatelessWidget {
               if (selected)
                 Icon(
                   Icons.check_circle,
-                  color: color.primary,
+                  color: colors.primary,
                 ),
             ],
           ),
