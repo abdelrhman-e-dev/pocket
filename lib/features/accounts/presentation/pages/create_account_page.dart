@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:go_router/go_router.dart';
 import '../../models/account_type.dart';
 import '../../providers/selected_account_type_provider.dart';
 import '../../providers/create_account_provider.dart';
@@ -198,6 +198,8 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("تم إنشاء الحساب بنجاح")),
                 );
+
+                context.go('/');
               },
             ),
           ],
