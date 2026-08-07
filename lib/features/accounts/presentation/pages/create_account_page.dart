@@ -199,7 +199,7 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                   const SnackBar(content: Text("تم إنشاء الحساب بنجاح")),
                 );
 
-                context.go('/');
+                context.go('/dashboard');
               },
             ),
           ],

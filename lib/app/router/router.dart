@@ -6,26 +6,27 @@ import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: '/onboarding',
+  initialLocation: '/',
 
   routes: [
     GoRoute(
       path: '/',
+      builder: (context, state) => const SplashPage(),
+    ),
+
+    GoRoute(
+      path: '/dashboard',
       builder: (context, state) => const DashboardPage(),
     ),
 
     GoRoute(
-      path: '/splash',
-      builder: (context, state) => const SplashPage(),
+      path: '/create-account',
+      builder: (context, state) => const CreateAccountPage(),
     ),
 
     GoRoute(
       path: '/onboarding',
       builder: (context, state) => const OnboardingPage(),
     ),
-    GoRoute(
-  path: '/create-account',
-  builder: (context, state) => const CreateAccountPage(),
-),
   ],
 );
