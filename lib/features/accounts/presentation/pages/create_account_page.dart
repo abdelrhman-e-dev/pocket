@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../models/account_type.dart';
-import '../../../../shared/components/cards/account_type_card.dart';
 import '../../providers/selected_account_type_provider.dart';
+
+import '../../../../shared/components/buttons/primary_button.dart';
+import '../../../../shared/components/cards/account_type_card.dart';
+import '../../../../shared/components/text_fields/app_text_field.dart';
 
 class CreateAccountPage extends ConsumerStatefulWidget {
   const CreateAccountPage({super.key});
 
   @override
-  ConsumerState<CreateAccountPage> createState() => _CreateAccountPageState();
+  ConsumerState<CreateAccountPage> createState() =>
+      _CreateAccountPageState();
 }
 
-class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
+class _CreateAccountPageState
+    extends ConsumerState<CreateAccountPage> {
+
   final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
@@ -27,32 +34,56 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedType = ref.watch(selectedAccountTypeProvider);
+
+    final selectedType =
+        ref.watch(selectedAccountTypeProvider);
+
     return Scaffold(
-      appBar: AppBar(title: const Text("إنشاء أول حساب")),
+      appBar: AppBar(
+        title: const Text("إنشاء أول حساب"),
+      ),
+
       body: Form(
         key: _formKey,
+
         child: ListView(
           padding: const EdgeInsets.all(20),
+
           children: [
+
             const Text(
               "اسم الحساب",
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
             ),
 
             const SizedBox(height: 8),
 
-            TextFormField(
-              decoration: const InputDecoration(
-                hintText: "مثال: المحفظة الشخصية",
-              ),
+            AppTextField(
+              controller: _nameController,
+              hint: "مثال: المحفظة الشخصية",
+
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return "من فضلك أدخل اسم الحساب";
+                }
+
+                if (value.trim().length < 3) {
+                  return "الاسم يجب أن يكون 3 أحرف على الأقل";
+                }
+
+                return null;
+              },
             ),
 
             const SizedBox(height: 24),
 
             const Text(
               "نوع الحساب",
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
             ),
 
             const SizedBox(height: 12),
@@ -61,10 +92,16 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
               icon: Icons.payments,
               title: "نقدية",
               subtitle: "للمصاريف اليومية",
-              selected: selectedType == AccountType.cash,
+
+              selected:
+                  selectedType == AccountType.cash,
+
               onTap: () {
-                ref.read(selectedAccountTypeProvider.notifier).state =
-                    AccountType.cash;
+                ref
+                    .read(
+                      selectedAccountTypeProvider.notifier,
+                    )
+                    .state = AccountType.cash;
               },
             ),
 
@@ -74,10 +111,16 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
               icon: Icons.account_balance,
               title: "حساب بنكي",
               subtitle: "الحسابات البنكية",
-              selected: selectedType == AccountType.bank,
+
+              selected:
+                  selectedType == AccountType.bank,
+
               onTap: () {
-                ref.read(selectedAccountTypeProvider.notifier).state =
-                    AccountType.bank;
+                ref
+                    .read(
+                      selectedAccountTypeProvider.notifier,
+                    )
+                    .state = AccountType.bank;
               },
             ),
 
@@ -87,9 +130,17 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
               icon: Icons.credit_card,
               title: "بطاقة ائتمانية",
               subtitle: "Visa / MasterCard",
-              selected: selectedType == AccountType.creditCard,
+
+              selected:
+                  selectedType ==
+                      AccountType.creditCard,
+
               onTap: () {
-                ref.read(selectedAccountTypeProvider.notifier).state =
+                ref
+                    .read(
+                      selectedAccountTypeProvider.notifier,
+                    )
+                    .state =
                     AccountType.creditCard;
               },
             ),
@@ -99,10 +150,19 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
             AccountTypeCard(
               icon: Icons.account_balance_wallet,
               title: "محفظة إلكترونية",
-              subtitle: "Vodafone Cash - InstaPay",
-              selected: selectedType == AccountType.digitalWallet,
+              subtitle:
+                  "Vodafone Cash - InstaPay",
+
+              selected:
+                  selectedType ==
+                      AccountType.digitalWallet,
+
               onTap: () {
-                ref.read(selectedAccountTypeProvider.notifier).state =
+                ref
+                    .read(
+                      selectedAccountTypeProvider.notifier,
+                    )
+                    .state =
                     AccountType.digitalWallet;
               },
             ),
@@ -111,27 +171,67 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
 
             const Text(
               "الرصيد الافتتاحي",
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
             ),
 
             const SizedBox(height: 8),
 
-            TextFormField(
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                hintText: "0",
-                suffixText: "جنيه",
+            AppTextField(
+              controller: _balanceController,
+
+              keyboardType:
+                  const TextInputType.numberWithOptions(
+                decimal: true,
               ),
+
+              hint: "0",
+
+              suffixText: "جنيه",
+
+              validator: (value) {
+                if (value == null ||
+                    value.trim().isEmpty) {
+                  return "أدخل الرصيد";
+                }
+
+                final balance =
+                    double.tryParse(value);
+
+                if (balance == null) {
+                  return "رقم غير صحيح";
+                }
+
+                if (balance < 0) {
+                  return "الرصيد لا يمكن أن يكون سالبًا";
+                }
+
+                return null;
+              },
             ),
 
             const SizedBox(height: 40),
 
-            SizedBox(
-              height: 54,
-              child: FilledButton(
-                onPressed: () {},
-                child: const Text("متابعة"),
-              ),
+            PrimaryButton(
+              text: "متابعة",
+
+              onPressed: () {
+
+                if (!_formKey.currentState!
+                    .validate()) {
+                  return;
+                }
+
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      "✅ البيانات صحيحة",
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),
