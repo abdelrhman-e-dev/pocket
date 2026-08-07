@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../../features/accounts/presentation/pagse/create_account_page.dart';
 import '../../features/dashboard/dashboard.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
@@ -22,5 +23,9 @@ final GoRouter router = GoRouter(
       path: '/onboarding',
       builder: (context, state) => const OnboardingPage(),
     ),
+    GoRoute(
+  path: '/create-account',
+  builder: (context, state) => const CreateAccountPage(),
+),
   ],
 );
