@@ -23,9 +23,11 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   final _amountController = TextEditingController();
   int? _selectedAccountId;
   int? _selectedCategoryId;
+  final _notesController = TextEditingController();
   @override
   void dispose() {
     _amountController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -36,6 +38,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     final categoriesAsync = ref.watch(
       transactionCategoriesProvider(selectedType),
     );
+
+    DateTime selectedDate = DateTime.now();
     return Scaffold(
       appBar: AppBar(title: const Text('إضافة عملية')),
 
@@ -88,8 +92,10 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             ),
 
             const SizedBox(height: 28),
+            // amount
             const Text('المبلغ', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
+            // amount text field
             AppTextField(
               controller: _amountController,
               hint: 'مثال: 150',
@@ -116,8 +122,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 return null;
               },
             ),
+            // account
             const SizedBox(height: 24),
-
             const Text('الحساب', style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             accountsAsync.when(
@@ -176,7 +182,51 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
               },
             ),
             const SizedBox(height: 24),
+            // date
+            const Text(
+              'التاريخ',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            InkWell(
+              onTap: () async {
+                final date = await showDatePicker(
+                  context: context,
+                  initialDate: selectedDate,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime.now(),
+                );
 
+                if (date == null) return;
+
+                setState(() {
+                  selectedDate = date;
+                });
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: InputDecorator(
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.calendar_today_outlined),
+                ),
+                child: Text(
+                  '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            // notes
+            const SizedBox(height: 24),
+            const Text(
+              'ملاحظات',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            AppTextField(
+              controller: _notesController,
+              hint: 'أدخل ملاحظاتك هنا',
+              maxLines: 3,
+            ),
+            const SizedBox(height: 40),
             PrimaryButton(
               text: 'متابعة',
               onPressed: () {
