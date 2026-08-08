@@ -10,6 +10,8 @@ import '../widgets/transaction_type_card.dart';
 import '../../providers/transaction_accounts_provider.dart';
 import '../widgets/account_selector.dart';
 import '../../providers/transaction_repository_provider.dart';
+import 'package:go_router/go_router.dart';
+import '../../../dashboard/providers/dashboard_provider.dart';
 
 class AddTransactionPage extends ConsumerStatefulWidget {
   const AddTransactionPage({super.key});
@@ -270,12 +272,11 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                         note: note.isEmpty ? null : note,
                         transactionDate: selectedDate,
                       );
-
+                  // reload the dashboard
                   if (!context.mounted) return;
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('تم حفظ العملية بنجاح')),
-                  );
+                  ref.invalidate(dashboardProvider);
+                  // return to dashboard
+                  context.pop();
                 } catch (e) {
                   if (!context.mounted) return;
 
