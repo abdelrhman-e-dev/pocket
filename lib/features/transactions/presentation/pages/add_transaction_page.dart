@@ -9,6 +9,7 @@ import '../../providers/transaction_type_provider.dart';
 import '../widgets/transaction_type_card.dart';
 import '../../providers/transaction_accounts_provider.dart';
 import '../widgets/account_selector.dart';
+import '../../providers/transaction_repository_provider.dart';
 
 class AddTransactionPage extends ConsumerStatefulWidget {
   const AddTransactionPage({super.key});
@@ -229,7 +230,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             const SizedBox(height: 40),
             PrimaryButton(
               text: 'متابعة',
-              onPressed: () {
+              onPressed: () async {
                 if (!_formKey.currentState!.validate()) {
                   return;
                 }
@@ -242,17 +243,46 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   return;
                 }
 
+                if (_selectedCategoryId == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('من فضلك اختر التصنيف')),
+                  );
+
+                  return;
+                }
+
                 final amount = double.parse(_amountController.text.trim());
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      selectedType == TransactionType.expense
-                          ? 'مصروف: $amount جنيه'
-                          : 'دخل: $amount جنيه',
-                    ),
-                  ),
-                );
+                final type = selectedType == TransactionType.expense
+                    ? 'expense'
+                    : 'income';
+
+                final note = _notesController.text.trim();
+
+                try {
+                  await ref
+                      .read(transactionRepositoryProvider)
+                      .createTransaction(
+                        accountId: _selectedAccountId!,
+                        categoryId: _selectedCategoryId!,
+                        type: type,
+                        amount: amount,
+                        note: note.isEmpty ? null : note,
+                        transactionDate: selectedDate,
+                      );
+
+                  if (!context.mounted) return;
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('تم حفظ العملية بنجاح')),
+                  );
+                } catch (e) {
+                  if (!context.mounted) return;
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('حدث خطأ أثناء حفظ العملية')),
+                  );
+                }
               },
             ),
           ],
