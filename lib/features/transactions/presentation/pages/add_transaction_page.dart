@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import '../../providers/transaction_categories_provider.dart';
+import '../widgets/category_selector.dart';
 import '../../../../shared/components/buttons/primary_button.dart';
 import '../../../../shared/components/text_fields/app_text_field.dart';
 import '../../models/transaction_type.dart';
@@ -21,6 +22,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
   final _amountController = TextEditingController();
   int? _selectedAccountId;
+  int? _selectedCategoryId;
   @override
   void dispose() {
     _amountController.dispose();
@@ -31,6 +33,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   Widget build(BuildContext context) {
     final selectedType = ref.watch(transactionTypeProvider);
     final accountsAsync = ref.watch(transactionAccountsProvider);
+    final categoriesAsync = ref.watch(
+      transactionCategoriesProvider(selectedType),
+    );
     return Scaffold(
       appBar: AppBar(title: const Text('إضافة عملية')),
 
@@ -57,6 +62,10 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   onTap: () {
                     ref.read(transactionTypeProvider.notifier).state =
                         TransactionType.expense;
+
+                    setState(() {
+                      _selectedCategoryId = null;
+                    });
                   },
                 ),
 
@@ -69,17 +78,18 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   onTap: () {
                     ref.read(transactionTypeProvider.notifier).state =
                         TransactionType.income;
+
+                    setState(() {
+                      _selectedCategoryId = null;
+                    });
                   },
                 ),
               ],
             ),
 
             const SizedBox(height: 28),
-
             const Text('المبلغ', style: TextStyle(fontWeight: FontWeight.bold)),
-
             const SizedBox(height: 8),
-
             AppTextField(
               controller: _amountController,
               hint: 'مثال: 150',
@@ -109,9 +119,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             const SizedBox(height: 24),
 
             const Text('الحساب', style: TextStyle(fontWeight: FontWeight.bold)),
-
             const SizedBox(height: 8),
-
             accountsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
 
@@ -136,7 +144,38 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 );
               },
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 24),
+
+            const Text(
+              'التصنيف',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            categoriesAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+
+              error: (error, stackTrace) => Text(
+                'حدث خطأ أثناء تحميل التصنيفات',
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+
+              data: (categories) {
+                if (categories.isEmpty) {
+                  return const Text('لا توجد تصنيفات');
+                }
+
+                return CategorySelector(
+                  categories: categories,
+                  selectedCategoryId: _selectedCategoryId,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedCategoryId = value;
+                    });
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: 24),
 
             PrimaryButton(
               text: 'متابعة',
