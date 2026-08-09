@@ -5,16 +5,16 @@ import '../../providers/dashboard_provider.dart';
 import '../widgets/account_title.dart';
 import '../widgets/balance_card.dart';
 import '../widgets/empty_dashboard.dart';
-import '../../../transactions/providers/recent_transactions_provider.dart';
 import '../widgets/recent_transactions.dart';
-
+import '../../../transactions/providers/recent_transactions_with_details_provider.dart';
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accounts = ref.watch(dashboardProvider);
-    final transactions = ref.watch(recentTransactionsProvider);
+    final transactions =
+    ref.watch(recentTransactionsWithDetailsProvider);
     return Scaffold(
       appBar: AppBar(title: const Text("Pocket")),
 
@@ -56,12 +56,12 @@ class DashboardPage extends ConsumerWidget {
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
 
-                data: (items) => RecentTransactions(
-                  transactions: items,
-                  onViewAll: () {
-                    context.push('/transactions');
-                  },
-                ),
+              data: (items) => RecentTransactions(
+  transactions: items,
+  onViewAll: () {
+    context.push('/transactions');
+  },
+),
               ),
             ],
           );

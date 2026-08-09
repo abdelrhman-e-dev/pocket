@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
-
+import '../models/transaction_with_details.dart';
 class TransactionRepository {
   TransactionRepository(this._database);
 
@@ -57,5 +57,39 @@ class TransactionRepository {
           ])
           ..limit(limit))
         .get();
+  }
+
+  Future<List<TransactionWithDetails>> getRecentTransactionsWithDetails({
+    int limit = 5,
+  }) async {
+    final query = _database.select(_database.transactions).join([
+      innerJoin(
+        _database.accounts,
+        _database.accounts.id.equalsExp(_database.transactions.accountId),
+      ),
+      innerJoin(
+        _database.categories,
+        _database.categories.id.equalsExp(_database.transactions.categoryId),
+      ),
+    ]);
+
+    query
+      ..orderBy([
+        OrderingTerm(
+          expression: _database.transactions.transactionDate,
+          mode: OrderingMode.desc,
+        ),
+      ])
+      ..limit(limit);
+
+    final rows = await query.get();
+
+    return rows.map((row) {
+      return TransactionWithDetails(
+        transaction: row.readTable(_database.transactions),
+        account: row.readTable(_database.accounts),
+        category: row.readTable(_database.categories),
+      );
+    }).toList();
   }
 }

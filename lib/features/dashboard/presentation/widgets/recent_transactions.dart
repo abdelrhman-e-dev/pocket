@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/database/app_database.dart';
+import '../../../../features/transactions/models/transaction_with_details.dart';
 
 class RecentTransactions extends StatelessWidget {
   const RecentTransactions({
@@ -9,7 +9,7 @@ class RecentTransactions extends StatelessWidget {
     required this.onViewAll,
   });
 
-  final List<Transaction> transactions;
+  final List<TransactionWithDetails> transactions;
   final VoidCallback onViewAll;
 
   @override
@@ -20,7 +20,9 @@ class RecentTransactions extends StatelessWidget {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 20),
         child: Center(
-          child: Text('لا توجد عمليات حتى الآن'),
+          child: Text(
+            'لا توجد عمليات حتى الآن',
+          ),
         ),
       );
     }
@@ -52,7 +54,11 @@ class RecentTransactions extends StatelessWidget {
         const SizedBox(height: 12),
 
         ...recentTransactions.map(
-          (transaction) {
+          (item) {
+            final transaction = item.transaction;
+            final account = item.account;
+            final category = item.category;
+
             final isExpense = transaction.type == 'expense';
 
             return Card(
@@ -73,15 +79,12 @@ class RecentTransactions extends StatelessWidget {
                 ),
 
                 title: Text(
-                  transaction.note?.isNotEmpty == true
-                      ? transaction.note!
-                      : isExpense
-                          ? 'مصروف'
-                          : 'دخل',
+                  category.name,
                 ),
 
                 subtitle: Text(
-                  _formatDate(transaction.transactionDate),
+                  '${account.name} • '
+                  '${_formatDate(transaction.transactionDate)}',
                 ),
 
                 trailing: Text(
