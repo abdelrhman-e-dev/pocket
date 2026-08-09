@@ -5,6 +5,8 @@ import '../../providers/dashboard_provider.dart';
 import '../widgets/account_title.dart';
 import '../widgets/balance_card.dart';
 import '../widgets/empty_dashboard.dart';
+import '../../../transactions/providers/recent_transactions_provider.dart';
+import '../widgets/recent_transactions.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -12,19 +14,14 @@ class DashboardPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accounts = ref.watch(dashboardProvider);
-
+    final transactions = ref.watch(recentTransactionsProvider);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Pocket"),
-      ),
+      appBar: AppBar(title: const Text("Pocket")),
 
       body: accounts.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CircularProgressIndicator()),
 
-        error: (e, _) => Center(
-          child: Text(e.toString()),
-        ),
+        error: (e, _) => Center(child: Text(e.toString())),
 
         data: (items) {
           if (items.isEmpty) {
@@ -47,6 +44,23 @@ class DashboardPage extends ConsumerWidget {
                 (account) => Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: AccountTile(account: account),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              transactions.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+
+                error: (error, stackTrace) => Text(
+                  'حدث خطأ أثناء تحميل العمليات',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+
+                data: (items) => RecentTransactions(
+                  transactions: items,
+                  onViewAll: () {
+                    context.push('/transactions');
+                  },
                 ),
               ),
             ],

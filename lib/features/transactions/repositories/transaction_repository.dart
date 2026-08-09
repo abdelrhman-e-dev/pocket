@@ -17,21 +17,23 @@ class TransactionRepository {
   }) async {
     await _database.transaction(() async {
       // 1 - save the transaction
-      await _database.into(_database.transactions).insert(
-        TransactionsCompanion.insert(
-          accountId: accountId,
-          categoryId: categoryId,
-          type: type,
-          amount: amount,
-          note: Value(note),
-          transactionDate: transactionDate,
-        ),
-      );
+      await _database
+          .into(_database.transactions)
+          .insert(
+            TransactionsCompanion.insert(
+              accountId: accountId,
+              categoryId: categoryId,
+              type: type,
+              amount: amount,
+              note: Value(note),
+              transactionDate: transactionDate,
+            ),
+          );
 
       // 2 - read the account
-      final account = await (_database.select(_database.accounts)
-            ..where((table) => table.id.equals(accountId)))
-          .getSingle();
+      final account = await (_database.select(
+        _database.accounts,
+      )..where((table) => table.id.equals(accountId))).getSingle();
 
       // 3 - calculate the new balance
       final newBalance = type == 'expense'
@@ -41,11 +43,19 @@ class TransactionRepository {
       // 4 - update the account balance
       await (_database.update(_database.accounts)
             ..where((table) => table.id.equals(accountId)))
-          .write(
-        AccountsCompanion(
-          currentBalance: Value(newBalance),
-        ),
-      );
+          .write(AccountsCompanion(currentBalance: Value(newBalance)));
     });
+  }
+
+  Future<List<Transaction>> getRecentTransactions({int limit = 5}) async {
+    return (_database.select(_database.transactions)
+          ..orderBy([
+            (table) => OrderingTerm(
+              expression: table.transactionDate,
+              mode: OrderingMode.desc,
+            ),
+          ])
+          ..limit(limit))
+        .get();
   }
 }

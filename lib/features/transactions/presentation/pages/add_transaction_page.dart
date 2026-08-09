@@ -12,7 +12,7 @@ import '../widgets/account_selector.dart';
 import '../../providers/transaction_repository_provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../dashboard/providers/dashboard_provider.dart';
-
+import '../../providers/recent_transactions_provider.dart';
 class AddTransactionPage extends ConsumerStatefulWidget {
   const AddTransactionPage({super.key});
 
@@ -275,6 +275,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   // reload the dashboard
                   if (!context.mounted) return;
                   ref.invalidate(dashboardProvider);
+                  ref.invalidate(recentTransactionsProvider);
                   // return to dashboard
                   context.pop();
                 } catch (e) {
