@@ -1,0 +1,11 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../models/transaction_with_details.dart';
+import 'transaction_repository_provider.dart';
+
+final recentTransactionsWithDetailsProvider =
+    FutureProvider<List<TransactionWithDetails>>((ref) {
+  final repository = ref.watch(transactionRepositoryProvider);
+
+  return repository.getRecentTransactionsWithDetails();
+});
