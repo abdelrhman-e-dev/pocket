@@ -22,11 +22,15 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   Future<void> _initialize() async {
     final controller = ref.read(splashControllerProvider);
 
-    await controller.initialize();
+    final hasAccounts = await controller.initialize();
 
     if (!mounted) return;
 
-    context.go('/dashboard');
+    if (hasAccounts) {
+      context.go('/dashboard');
+    } else {
+      context.go('/onboarding');
+    }
   }
 
   @override

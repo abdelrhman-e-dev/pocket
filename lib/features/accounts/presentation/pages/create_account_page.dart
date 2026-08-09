@@ -9,6 +9,7 @@ import '../../providers/create_account_provider.dart';
 import '../../../../shared/components/buttons/primary_button.dart';
 import '../../../../shared/components/cards/account_type_card.dart';
 import '../../../../shared/components/text_fields/app_text_field.dart';
+import '../../../dashboard/providers/dashboard_provider.dart';
 
 class CreateAccountPage extends ConsumerStatefulWidget {
   const CreateAccountPage({super.key});
@@ -286,6 +287,10 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                     if (!context.mounted) {
                       return;
                     }
+
+                    // Invalidate the dashboard cache so it refetches the
+                    // updated account list instead of showing the empty state.
+                    ref.invalidate(dashboardProvider);
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('تم إنشاء الحساب بنجاح')),
