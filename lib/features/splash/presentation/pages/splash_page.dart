@@ -16,20 +16,17 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   void initState() {
     super.initState();
 
-    _start();
+    _initialize();
   }
 
-  Future<void> _start() async {
-    final hasAccounts =
-        await ref.read(splashControllerProvider).hasAccounts();
+  Future<void> _initialize() async {
+    final controller = ref.read(splashControllerProvider);
+
+    await controller.initialize();
 
     if (!mounted) return;
 
-    if (hasAccounts) {
-      context.go('/dashboard');
-    } else {
-      context.go('/create-account');
-    }
+    context.go('/dashboard');
   }
 
   @override
@@ -39,7 +36,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
         color: Theme.of(context).colorScheme.primary,
         child: const Center(
           child: Text(
-            "Pocket",
+            'Pocket',
             style: TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.bold,

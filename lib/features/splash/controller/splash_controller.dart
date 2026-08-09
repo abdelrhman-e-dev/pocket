@@ -1,23 +1,45 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../accounts/providers/account_repository_provider.dart';
+import '../../../core/database/app_database.dart';
+import '../../../core/database/database_provider.dart';
 
-final splashControllerProvider = Provider(
-  (ref) => SplashController(ref),
-);
+final splashControllerProvider = Provider<SplashController>((ref) {
+  final database = ref.read(databaseProvider);
+
+  return SplashController(database);
+});
 
 class SplashController {
-  SplashController(this.ref);
+  SplashController(this._database);
 
-  final Ref ref;
+  final AppDatabase _database;
 
-  Future<bool> hasAccounts() async {
-    await Future.delayed(const Duration(seconds: 2));
+  Future<bool> initialize() async {
+    await Future.delayed(
+      const Duration(milliseconds: 1200),
+    );
 
-    final repository = ref.read(accountRepositoryProvider);
+    try {
+      final accounts = await _database
+          .select(_database.accounts)
+          .get();
 
-    final accounts = await repository.getAccounts();
+      debugPrint(
+        'Splash: accounts count = ${accounts.length}',
+      );
 
-    return accounts.isNotEmpty;
+      return accounts.isNotEmpty;
+    } catch (e, stackTrace) {
+      debugPrint(
+        'Splash initialization error: $e',
+      );
+
+      debugPrint(
+        stackTrace.toString(),
+      );
+
+      return false;
+    }
   }
 }
