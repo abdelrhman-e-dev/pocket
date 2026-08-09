@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/colors.dart';
-
 class AccountTypeCard extends StatelessWidget {
   const AccountTypeCard({
     super.key,
@@ -20,75 +18,87 @@ class AccountTypeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: AppColors.surface,
-      elevation: selected ? 4 : 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: selected ? AppColors.primary : AppColors.border,
-          width: selected ? 2 : 1,
-        ),
-      ),
+    final colors = Theme.of(context).colorScheme;
+
+    return Material(
+      color: colors.surface,
+      borderRadius: BorderRadius.circular(16),
+
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
+
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+
+          decoration: BoxDecoration(
+            color: selected
+                ? colors.primary.withValues(alpha: 0.04)
+                : colors.surface,
+
+            borderRadius: BorderRadius.circular(16),
+
+            border: Border.all(
+              color: selected ? colors.primary : colors.outlineVariant,
+              width: selected ? 2 : 1,
+            ),
+          ),
+
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // =========================
+              // Icon
+              // =========================
               Container(
                 width: 52,
                 height: 52,
+
                 decoration: BoxDecoration(
                   color: selected
-                      ? AppColors.primary.withValues(alpha: 0.15)
-                      : AppColors.card,
+                      ? colors.primaryContainer
+                      : colors.surfaceContainerHigh,
+
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(
-                  icon,
-                  color: AppColors.primary,
-                  size: 28,
+
+                child: Icon(icon, size: 27, color: colors.primary),
+              ),
+
+              const SizedBox(height: 10),
+
+              // =========================
+              // Title
+              // =========================
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: colors.onSurface,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
 
-              const SizedBox(width: 16),
+              const SizedBox(height: 4),
 
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                    ),
-                  ],
+              // =========================
+              // Subtitle
+              // =========================
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colors.onSurfaceVariant,
+                  fontSize: 12,
                 ),
-              ),
-
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: selected
-                    ? const Icon(
-                        Icons.check_circle_rounded,
-                        key: ValueKey(true),
-                        color: AppColors.primary,
-                      )
-                    : const SizedBox(
-                        key: ValueKey(false),
-                        width: 24,
-                      ),
               ),
             ],
           ),
