@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../../core/database/app_database.dart';
 import '../models/transaction_with_details.dart';
+
 class TransactionRepository {
   TransactionRepository(this._database);
 
@@ -91,5 +92,51 @@ class TransactionRepository {
         category: row.readTable(_database.categories),
       );
     }).toList();
+  }
+
+  Future<double> getCurrentMonthExpenses() async {
+    final now = DateTime.now();
+
+    final startOfMonth = DateTime(now.year, now.month, 1);
+
+    final startOfNextMonth = DateTime(now.year, now.month + 1, 1);
+
+    final query = _database.select(_database.transactions)
+      ..where(
+        (table) =>
+            table.type.equals('expense') &
+            table.transactionDate.isBiggerOrEqualValue(startOfMonth) &
+            table.transactionDate.isSmallerThanValue(startOfNextMonth),
+      );
+
+    final transactions = await query.get();
+
+    return transactions.fold<double>(
+      0,
+      (sum, transaction) => sum + transaction.amount,
+    );
+  }
+
+  Future<double> getCurrentMonthIncome() async {
+    final now = DateTime.now();
+
+    final startOfMonth = DateTime(now.year, now.month, 1);
+
+    final startOfNextMonth = DateTime(now.year, now.month + 1, 1);
+
+    final query = _database.select(_database.transactions)
+      ..where(
+        (table) =>
+            table.type.equals('income') &
+            table.transactionDate.isBiggerOrEqualValue(startOfMonth) &
+            table.transactionDate.isSmallerThanValue(startOfNextMonth),
+      );
+
+    final transactions = await query.get();
+
+    return transactions.fold<double>(
+      0,
+      (sum, transaction) => sum + transaction.amount,
+    );
   }
 }
