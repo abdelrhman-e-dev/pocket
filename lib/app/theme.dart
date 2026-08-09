@@ -1,60 +1,151 @@
 import 'package:flutter/material.dart';
-import '../core/theme/colors.dart';
-
+import 'package:flutter/services.dart';
 class AppTheme {
-  static ThemeData darkTheme = ThemeData(
+  // =========================
+  // App Colors
+  // =========================
+
+  static const Color backgroundColor = Color(0xFFFAFBFC);
+
+  static const Color imageAreaColor = Color(0xFFF4F6F8);
+
+  static const Color primaryColor = Color(0xFF00658A);
+
+  static const Color secondaryColor = Color(0xFF4F7C92);
+
+  static const Color textColor = Color(0xFF172027);
+
+  static const Color subtitleColor = Color(0xFF52616B);
+
+  static const Color surfaceColor = Colors.white;
+
+  static const Color borderColor = Color(0xFFE4E9ED);
+
+  static const Color iconBackgroundColor = Color(0xFFE1F2F8);
+
+  static const Color errorColor = Color(0xFFBA1A1A);
+
+  // =========================
+  // Light Theme
+  // =========================
+
+  static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
-
-    brightness: Brightness.dark,
-
     fontFamily: 'Cairo',
+    colorScheme:
+        ColorScheme.fromSeed(
+          seedColor: primaryColor,
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: primaryColor,
+          onPrimary: Colors.white,
 
-    colorScheme: const ColorScheme.dark(
-      primary: AppColors.primary,
-      secondary: AppColors.secondary,
-      surface: AppColors.surface,
-      error: AppColors.error,
-    ),
+          secondary: secondaryColor,
 
-    scaffoldBackgroundColor: AppColors.background,
+          primaryContainer: iconBackgroundColor,
+          onPrimaryContainer: primaryColor,
 
-    appBarTheme: const AppBarTheme(
-      centerTitle: true,
-      elevation: 0,
-      backgroundColor: AppColors.background,
-      foregroundColor: AppColors.textPrimary,
-    ),
+          surface: surfaceColor,
+          onSurface: textColor,
+
+          surfaceContainerLowest: Colors.white,
+          surfaceContainerLow: backgroundColor,
+          surfaceContainer: const Color(0xFFF4F6F8),
+          surfaceContainerHigh: const Color(0xFFEFF2F4),
+
+          outline: const Color(0xFFD9E0E5),
+          outlineVariant: borderColor,
+
+          error: errorColor,
+          onError: Colors.white,
+        ),
+    scaffoldBackgroundColor: backgroundColor,
+
+appBarTheme: const AppBarTheme(
+  backgroundColor: Colors.white,
+  foregroundColor: Color(0xFF172027),
+  centerTitle: true,
+  elevation: 0,
+  scrolledUnderElevation: 0,
+
+  systemOverlayStyle: SystemUiOverlayStyle(
+    statusBarColor: Colors.white,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
+  ),
+),
 
     cardTheme: CardThemeData(
-      color: AppColors.surface,
+      color: surfaceColor,
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: const BorderSide(color: borderColor),
+      ),
     ),
 
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: AppColors.surface,
+      fillColor: surfaceColor,
 
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
 
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFD9E0E5)),
       ),
 
-      focusedBorder: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(16)),
-        borderSide: BorderSide(color: AppColors.primary, width: 2),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFD9E0E5)),
+      ),
+
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: primaryColor, width: 2),
+      ),
+
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: errorColor),
+      ),
+
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: errorColor, width: 2),
       ),
     ),
 
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: AppColors.primary,
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
-        minimumSize: const Size.fromHeight(56),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+
+        minimumSize: const Size(double.infinity, 54),
+
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+
+        textStyle: const TextStyle(
+          fontFamily: 'Cairo',
+          fontWeight: FontWeight.bold,
+          fontSize: 15,
+        ),
       ),
     ),
+
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: primaryColor,
+        textStyle: const TextStyle(fontWeight: FontWeight.w600),
+      ),
+    ),
+
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: primaryColor,
+      foregroundColor: Colors.white,
+    ),
+
+    dividerTheme: const DividerThemeData(color: borderColor, thickness: 1),
   );
 }
