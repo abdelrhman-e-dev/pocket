@@ -17,12 +17,31 @@ class RecentTransactions extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
 
     if (transactions.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 20),
-        child: Center(
-          child: Text(
-            'لا توجد عمليات حتى الآن',
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 28),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: colors.outlineVariant,
           ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              Icons.receipt_long_outlined,
+              size: 36,
+              color: colors.onSurfaceVariant,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'لا توجد عمليات حتى الآن',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+            ),
+          ],
         ),
       );
     }
@@ -33,15 +52,16 @@ class RecentTransactions extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // العنوان
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'آخر العمليات',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colors.onSurface,
+                  ),
             ),
 
             TextButton(
@@ -53,6 +73,7 @@ class RecentTransactions extends StatelessWidget {
 
         const SizedBox(height: 12),
 
+        // العمليات
         ...recentTransactions.map(
           (item) {
             final transaction = item.transaction;
@@ -61,42 +82,95 @@ class RecentTransactions extends StatelessWidget {
 
             final isExpense = transaction.type == 'expense';
 
-            return Card(
+            return Container(
               margin: const EdgeInsets.only(bottom: 10),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: isExpense
-                      ? colors.errorContainer
-                      : colors.primaryContainer,
-                  child: Icon(
-                    isExpense
-                        ? Icons.arrow_downward
-                        : Icons.arrow_upward,
-                    color: isExpense
-                        ? colors.error
-                        : colors.primary,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: colors.outlineVariant,
+                ),
+              ),
+              child: Row(
+                children: [
+                  // الأيقونة
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: isExpense
+                          ? colors.errorContainer
+                          : colors.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      isExpense
+                          ? Icons.arrow_downward_rounded
+                          : Icons.arrow_upward_rounded,
+                      color: isExpense
+                          ? colors.error
+                          : colors.primary,
+                      size: 21,
+                    ),
                   ),
-                ),
 
-                title: Text(
-                  category.name,
-                ),
+                  const SizedBox(width: 12),
 
-                subtitle: Text(
-                  '${account.name} • '
-                  '${_formatDate(transaction.transactionDate)}',
-                ),
+                  // البيانات
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          category.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
 
-                trailing: Text(
-                  '${isExpense ? '-' : '+'}'
-                  '${transaction.amount.toStringAsFixed(2)} جنيه',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: isExpense
-                        ? colors.error
-                        : colors.primary,
+                        const SizedBox(height: 3),
+
+                        Text(
+                          '${account.name} • ${_formatDate(transaction.transactionDate)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                                color: colors.onSurfaceVariant,
+                              ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+
+                  const SizedBox(width: 8),
+
+                  // المبلغ
+                  Text(
+                    '${isExpense ? '-' : '+'}'
+                    '${transaction.amount.toStringAsFixed(0)}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(
+                          color: isExpense
+                              ? colors.error
+                              : colors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ],
               ),
             );
           },
