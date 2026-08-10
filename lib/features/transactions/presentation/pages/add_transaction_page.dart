@@ -165,9 +165,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     });
   }
 
-  void _focusNoteField() {
-    _noteFocusNode.requestFocus();
-  }
 
   @override
   Widget build(BuildContext context) {
