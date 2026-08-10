@@ -12,6 +12,8 @@ class AppTextField extends StatelessWidget {
     this.prefixIcon,
     this.obscureText = false,
     this.maxLines = 1,
+    this.textAlign = TextAlign.right,
+    this.style,
   });
 
   final TextEditingController controller;
@@ -23,6 +25,8 @@ class AppTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final bool obscureText;
   final int maxLines;
+  final TextAlign textAlign;
+  final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -32,14 +36,14 @@ class AppTextField extends StatelessWidget {
       keyboardType: keyboardType,
       obscureText: obscureText,
       maxLines: maxLines,
+      textAlign: textAlign,
+      style: style,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
         suffixText: suffixText,
         prefixIcon: prefixIcon,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }
