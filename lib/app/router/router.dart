@@ -5,7 +5,7 @@ import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
-
+import '../../features/transactions/presentation/pages/transactions_page.dart';
 final GoRouter router = GoRouter(
   initialLocation: '/',
 
@@ -16,7 +16,10 @@ final GoRouter router = GoRouter(
       path: '/dashboard',
       builder: (context, state) => const DashboardPage(),
     ),
-
+    GoRoute(
+      path: '/transactions',
+      builder: (context, state) => const TransactionsPage(),
+    ),
     GoRoute(
       path: '/create-account',
       builder: (context, state) => const CreateAccountPage(),

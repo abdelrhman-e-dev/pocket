@@ -94,6 +94,42 @@ class TransactionRepository {
     }).toList();
   }
 
+  Future<List<TransactionWithDetails>> getAllTransactionsWithDetails({
+    String? type,
+  }) async {
+    final query = _database.select(_database.transactions).join([
+      innerJoin(
+        _database.accounts,
+        _database.accounts.id.equalsExp(_database.transactions.accountId),
+      ),
+      innerJoin(
+        _database.categories,
+        _database.categories.id.equalsExp(_database.transactions.categoryId),
+      ),
+    ]);
+
+    if (type != null) {
+      query.where(_database.transactions.type.equals(type));
+    }
+
+    query.orderBy([
+      OrderingTerm(
+        expression: _database.transactions.transactionDate,
+        mode: OrderingMode.desc,
+      ),
+    ]);
+
+    final rows = await query.get();
+
+    return rows.map((row) {
+      return TransactionWithDetails(
+        transaction: row.readTable(_database.transactions),
+        account: row.readTable(_database.accounts),
+        category: row.readTable(_database.categories),
+      );
+    }).toList();
+  }
+
   Future<double> getCurrentMonthExpenses() async {
     final now = DateTime.now();
 
