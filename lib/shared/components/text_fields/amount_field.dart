@@ -1,28 +1,22 @@
 import 'package:flutter/material.dart';
 
 class AmountField extends StatelessWidget {
-  const AmountField({
-    super.key,
-    required this.controller,
-    this.hint = '0.00',
-  });
+  const AmountField({super.key, required this.controller, this.hint = '0.00'});
 
   final TextEditingController controller;
+  
   final String hint;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-
+    final focusNode = FocusNode();
     return Container(
       height: 120,
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: colors.outline,
-          width: 1.5,
-        ),
+        border: Border.all(color: colors.outline, width: 1.5),
       ),
       child: Directionality(
         textDirection: TextDirection.ltr,
@@ -44,10 +38,16 @@ class AmountField extends StatelessWidget {
 
             const SizedBox(width: 16),
 
-            // المبلغ
+            // amount
             Expanded(
               child: TextField(
                 controller: controller,
+                focusNode: focusNode,
+                autofocus: false,
+                onTapOutside: (event) {
+                  focusNode.unfocus();
+                },
+                
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
