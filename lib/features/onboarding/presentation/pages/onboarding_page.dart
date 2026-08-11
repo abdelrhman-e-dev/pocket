@@ -200,28 +200,11 @@ class _FeatureCard extends StatelessWidget {
       child: Row(
         children: [
           // =========================
-          // Icon
-          // =========================
-          Container(
-            width: 56,
-            height: 56,
-
-            decoration: const BoxDecoration(
-              color: AppTheme.iconBackgroundColor,
-              shape: BoxShape.circle,
-            ),
-
-            child: Icon(icon, color: AppTheme.primaryColor, size: 27),
-          ),
-
-          const SizedBox(width: 14),
-
-          // =========================
           // Text
           // =========================
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
 
               children: [
                 Text(
@@ -250,6 +233,21 @@ class _FeatureCard extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+          const SizedBox(width: 14),
+
+          // =========================
+          // Icon
+          // =========================
+          Container(
+            width: 56,
+            height: 56,
+
+            decoration: const BoxDecoration(
+              color: AppTheme.iconBackgroundColor,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: AppTheme.primaryColor, size: 27),
           ),
         ],
       ),
