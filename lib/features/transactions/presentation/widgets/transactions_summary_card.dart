@@ -26,40 +26,51 @@ class TransactionsSummaryCard extends StatelessWidget {
         children: [
           Row(
             textDirection: TextDirection.rtl,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ملخص الشهر',
+                      textAlign: TextAlign.right,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      textDirection: TextDirection.rtl,
+                      spacing: 12,
+                      children: [
+                        _StatColumn(
+                          label: 'إجمالي المصاريف',
+                          value: expenses,
+                          color: colors.error,
+                        ),
+                        _StatColumn(
+                          label: 'إجمالي الدخل',
+                          value: income,
+                          color: Colors.green,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
               Container(
-                width: 44,
-                height: 44,
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
-                  color: colors.primaryContainer,
+                  color: colors.primary,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.pie_chart_rounded, color: colors.primary),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'ملخص الشهر',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _StatColumn(
-                  label: 'إجمالي الدخل',
-                  value: income,
-                  color: Colors.green,
-                ),
-              ),
-              Expanded(
-                child: _StatColumn(
-                  label: 'إجمالي المصاريف',
-                  value: expenses,
-                  color: colors.error,
+                child: const Icon(
+                  Icons.pie_chart_outline,
+                  color: Colors.white,
+                  size: 28,
                 ),
               ),
             ],
@@ -86,7 +97,7 @@ class _StatColumn extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,

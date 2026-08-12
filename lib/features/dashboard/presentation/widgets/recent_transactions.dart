@@ -65,7 +65,7 @@ class RecentTransactions extends StatelessWidget {
 
             TextButton(
               onPressed: () {
-                context.go('/transactions');
+                context.push('/transactions');
               },
               child: const Text('عرض الكل'),
             ),

@@ -35,6 +35,9 @@ class TransactionFilterChips extends ConsumerWidget {
               ),
               backgroundColor: colors.surface,
               side: BorderSide(color: colors.outlineVariant),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(9999),
+              ),
             ),
           );
         }).toList(),
