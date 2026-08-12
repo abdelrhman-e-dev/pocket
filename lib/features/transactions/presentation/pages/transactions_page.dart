@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../dashboard/providers/dashboard_summary_provider.dart';
 import '../../models/transaction_with_details.dart';
@@ -52,6 +53,16 @@ final transactionsAsync = ref.watch(filteredTransactionsProvider);
         appBar: AppBar(
           title: const Text('العمليات'),
           centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/dashboard');
+              }
+            },
+          ),
         ),
         body: transactionsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
