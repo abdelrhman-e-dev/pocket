@@ -24,55 +24,65 @@ class TransactionListTile extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        textDirection: TextDirection.rtl,
-        children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              color: categoryColor.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerHighest.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          textDirection: TextDirection.rtl,
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: categoryColor.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                categoryIconFromKey(category.icon),
+                color: categoryColor,
+                size: 22,
+              ),
             ),
-            child: Icon(
-              categoryIconFromKey(category.icon),
-              color: categoryColor,
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  category.name,
-                  textDirection: TextDirection.rtl,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    category.name,
+                    textDirection: TextDirection.rtl,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  subtitle,
-                  textDirection: TextDirection.rtl,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
-                ),
-              ],
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    textDirection: TextDirection.rtl,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            '${isExpense ? '-' : '+'}${transaction.amount.toStringAsFixed(0)} ج.م',
-            style: TextStyle(
-              color: isExpense ? colors.error : Colors.green,
-              fontWeight: FontWeight.bold,
+            const SizedBox(width: 8),
+            Text(
+              '${isExpense ? '-' : '+'}${transaction.amount.toStringAsFixed(0)} ج.م',
+              style: TextStyle(
+                color: isExpense ? colors.error : Colors.green,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

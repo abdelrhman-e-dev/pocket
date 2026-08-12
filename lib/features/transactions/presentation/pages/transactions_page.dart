@@ -8,6 +8,7 @@ import '../../providers/filtered_transactions_provider.dart';
 import '../widgets/transaction_filter_chips.dart';
 import '../widgets/transaction_list_tile.dart';
 import '../widgets/transactions_summary_card.dart';
+import '../../../../shared/components/navigation/app_bottom_navigation.dart';
 
 class TransactionsPage extends ConsumerWidget {
   const TransactionsPage({super.key});
@@ -42,7 +43,7 @@ class TransactionsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-final transactionsAsync = ref.watch(filteredTransactionsProvider);
+    final transactionsAsync = ref.watch(filteredTransactionsProvider);
     final summaryAsync = ref.watch(dashboardSummaryProvider);
     final colors = Theme.of(context).colorScheme;
 
@@ -111,9 +112,7 @@ final transactionsAsync = ref.watch(filteredTransactionsProvider);
                         padding: const EdgeInsets.only(bottom: 10),
                         child: Text(
                           entry.key,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleSmall
+                          style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: colors.onSurfaceVariant,
@@ -130,6 +129,7 @@ final transactionsAsync = ref.watch(filteredTransactionsProvider);
             );
           },
         ),
+        bottomNavigationBar: const AppBottomNavigation(),
       ),
     );
   }

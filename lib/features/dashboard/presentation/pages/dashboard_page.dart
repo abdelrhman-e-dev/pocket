@@ -10,6 +10,7 @@ import '../widgets/dashboard_header.dart';
 import '../widgets/dashboard_summary.dart';
 import '../widgets/dashboard_accounts.dart';
 import '../../providers/dashboard_summary_provider.dart';
+import '../../../../shared/components/navigation/app_bottom_navigation.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -97,6 +98,7 @@ class DashboardPage extends ConsumerWidget {
         },
         child: const Icon(Icons.add),
       ),
+      bottomNavigationBar: const AppBottomNavigation(),
     );
   }
 }
