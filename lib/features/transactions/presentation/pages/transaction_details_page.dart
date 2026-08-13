@@ -8,7 +8,7 @@ import '../../models/transaction_with_details.dart';
 import '../../providers/all_transactions_provider.dart';
 import '../../providers/paginated_transactions_provider.dart';
 import '../../providers/recent_transactions_with_details_provider.dart';
-import '../../providers/transaction_repository_provider.dart';
+
 
 class TransactionDetailsPage extends ConsumerWidget {
   const TransactionDetailsPage({
