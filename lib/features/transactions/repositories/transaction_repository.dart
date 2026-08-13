@@ -94,42 +94,86 @@ class TransactionRepository {
     }).toList();
   }
 
-  Future<List<TransactionWithDetails>> getAllTransactionsWithDetails({
-    String? type,
-  }) async {
-    final query = _database.select(_database.transactions).join([
-      innerJoin(
-        _database.accounts,
-        _database.accounts.id.equalsExp(_database.transactions.accountId),
+Future<List<TransactionWithDetails>> getTransactionsWithDetails({
+  String? type,
+  int limit = 10,
+  int offset = 0,
+  DateTime? startDate,
+  DateTime? endDate,
+}) async {
+  final query = _database.select(_database.transactions).join([
+    innerJoin(
+      _database.accounts,
+      _database.accounts.id.equalsExp(
+        _database.transactions.accountId,
       ),
-      innerJoin(
-        _database.categories,
-        _database.categories.id.equalsExp(_database.transactions.categoryId),
+    ),
+    innerJoin(
+      _database.categories,
+      _database.categories.id.equalsExp(
+        _database.transactions.categoryId,
       ),
-    ]);
+    ),
+  ]);
 
-    if (type != null) {
-      query.where(_database.transactions.type.equals(type));
-    }
+  // فلترة حسب النوع
+  if (type != null) {
+    query.where(
+      _database.transactions.type.equals(type),
+    );
+  }
 
-    query.orderBy([
+  // بداية الفترة
+  if (startDate != null) {
+    query.where(
+      _database.transactions.transactionDate
+          .isBiggerOrEqualValue(startDate),
+    );
+  }
+
+  // نهاية الفترة
+  if (endDate != null) {
+    query.where(
+      _database.transactions.transactionDate
+          .isSmallerThanValue(endDate),
+    );
+  }
+
+  query
+    ..orderBy([
       OrderingTerm(
         expression: _database.transactions.transactionDate,
         mode: OrderingMode.desc,
       ),
-    ]);
+    ])
+    ..limit(limit, offset: offset);
 
-    final rows = await query.get();
+  final rows = await query.get();
 
-    return rows.map((row) {
-      return TransactionWithDetails(
-        transaction: row.readTable(_database.transactions),
-        account: row.readTable(_database.accounts),
-        category: row.readTable(_database.categories),
-      );
-    }).toList();
-  }
+  return rows.map((row) {
+    return TransactionWithDetails(
+      transaction: row.readTable(
+        _database.transactions,
+      ),
+      account: row.readTable(
+        _database.accounts,
+      ),
+      category: row.readTable(
+        _database.categories,
+      ),
+    );
+  }).toList();
+}
 
+Future<List<TransactionWithDetails>> getAllTransactionsWithDetails({
+  String? type,
+}) async {
+  return getTransactionsWithDetails(
+    type: type,
+    limit: 100000,
+    offset: 0,
+  );
+}
   Future<double> getCurrentMonthExpenses() async {
     final now = DateTime.now();
 
