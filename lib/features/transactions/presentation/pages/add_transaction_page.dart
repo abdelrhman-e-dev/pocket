@@ -8,13 +8,11 @@ import '../../providers/transaction_accounts_provider.dart';
 import '../../providers/transaction_repository_provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../dashboard/providers/dashboard_provider.dart';
-import '../../providers/recent_transactions_with_details_provider.dart';
 import '../../../dashboard/providers/dashboard_summary_provider.dart'
     hide transactionRepositoryProvider;
 import '../widgets/transaction_header.dart';
 import '../../../../shared/components/text_fields/amount_field.dart';
 import '../widgets/transaction_category_grid.dart';
-import '../../providers/transaction_accounts_provider.dart';
 import '../../providers/all_transactions_provider.dart';
 
 class AddTransactionPage extends ConsumerStatefulWidget {
