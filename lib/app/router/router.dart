@@ -6,6 +6,9 @@ import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
 import '../../features/transactions/presentation/pages/transactions_page.dart';
+import '../../features/transactions/presentation/pages/transaction_details_page.dart';
+import '../../features/transactions/models/transaction_with_details.dart';
+
 final GoRouter router = GoRouter(
   initialLocation: '/',
 
@@ -32,6 +35,19 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/add-transaction',
       builder: (context, state) => const AddTransactionPage(),
+    ),
+    GoRoute(
+      path: '/transactions',
+      builder: (context, state) => const TransactionsPage(),
+    ),
+
+    GoRoute(
+      path: '/transactions/details',
+      builder: (context, state) {
+        final transaction = state.extra as TransactionWithDetails;
+
+        return TransactionDetailsPage(transaction: transaction);
+      },
     ),
   ],
 );
