@@ -14,6 +14,8 @@ import '../../../dashboard/providers/dashboard_summary_provider.dart'
 import '../widgets/transaction_header.dart';
 import '../../../../shared/components/text_fields/amount_field.dart';
 import '../widgets/transaction_category_grid.dart';
+import '../../providers/transaction_accounts_provider.dart';
+import '../../providers/all_transactions_provider.dart';
 
 class AddTransactionPage extends ConsumerStatefulWidget {
   const AddTransactionPage({super.key});
@@ -48,15 +50,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   Future<void> _selectDate() async {
     final now = DateTime.now();
 
-    final today = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    );
+    final today = DateTime(now.year, now.month, now.day);
 
-    final initialDate = _selectedDate.isAfter(today)
-        ? today
-        : _selectedDate;
+    final initialDate = _selectedDate.isAfter(today) ? today : _selectedDate;
 
     final pickedDate = await showDatePicker(
       context: context,
@@ -164,7 +160,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
       _selectedAccountId = selectedId;
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -511,30 +506,41 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
                 final note = _notesController.text.trim();
 
-                try {
-                  await ref
-                      .read(transactionRepositoryProvider)
-                      .createTransaction(
-                        accountId: _selectedAccountId!,
-                        categoryId: _selectedCategoryId!,
-                        type: type,
-                        amount: amount,
-                        note: note.isEmpty ? null : note,
-                        transactionDate: _selectedDate,
-                      );
-                  // reload the dashboard
-                  if (!context.mounted) return;
-                  ref.invalidate(dashboardProvider);
-                  ref.invalidate(dashboardSummaryProvider);
-                  ref.invalidate(recentTransactionsWithDetailsProvider);
-                  context.pop();
-                } catch (e) {
-                  if (!context.mounted) return;
+              try {
+  await ref
+      .read(transactionRepositoryProvider)
+      .createTransaction(
+        accountId: _selectedAccountId!,
+        categoryId: _selectedCategoryId!,
+        type: type,
+        amount: amount,
+        note: note.isEmpty ? null : note,
+        transactionDate: _selectedDate,
+      );
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('حدث خطأ أثناء حفظ العملية')),
-                  );
-                }
+  if (!context.mounted) return;
+
+  // تحديث Dashboard
+  ref.invalidate(dashboardProvider);
+  ref.invalidate(dashboardSummaryProvider);
+
+  // تحديث أرصدة الحسابات
+  ref.invalidate(transactionAccountsProvider);
+
+  // تحديث سجل العمليات
+  ref.invalidate(allTransactionsWithDetailsProvider);
+
+  // الرجوع إلى صفحة العمليات
+  context.go('/transactions');
+} catch (e) {
+  if (!context.mounted) return;
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text('خطأ: $e'),
+    ),
+  );
+}
               },
             ),
           ],
