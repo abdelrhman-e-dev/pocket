@@ -1,3 +1,7 @@
+<div align="center">
+<img width="1264" height="843" alt="Image" src="https://github.com/user-attachments/assets/72fbbe6f-7b4e-4779-b3a8-859c147972d9" />
+</div>
+
 # Pocket 💰
 
 **Pocket** is a personal finance management application built with Flutter to help users manage their money, accounts, income, and expenses in one simple interface.
