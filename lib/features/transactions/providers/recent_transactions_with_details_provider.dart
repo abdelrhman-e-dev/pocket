@@ -5,7 +5,7 @@ import 'transaction_repository_provider.dart';
 
 final recentTransactionsWithDetailsProvider =
     FutureProvider<List<TransactionWithDetails>>((ref) {
-  final repository = ref.watch(transactionRepositoryProvider);
+  final repository = ref.watch(transactionRepositoryProviderPage);
 
   return repository.getRecentTransactionsWithDetails();
 });

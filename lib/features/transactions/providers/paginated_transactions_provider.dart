@@ -162,7 +162,7 @@ final paginatedTransactionsProvider =
       PaginatedTransactionsNotifier,
       PaginatedTransactionsState
     >((ref) {
-      final repository = ref.watch(transactionRepositoryProvider);
+      final repository = ref.watch(transactionRepositoryProviderPage);
 
       final type = ref.watch(transactionFilterProvider);
 
