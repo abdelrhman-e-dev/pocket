@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../dashboard/providers/dashboard_provider.dart';
+import '../../../dashboard/providers/dashboard_summary_provider.dart';
 import '../../models/transaction_with_details.dart';
+import '../../providers/all_transactions_provider.dart';
+import '../../providers/paginated_transactions_provider.dart';
+import '../../providers/recent_transactions_with_details_provider.dart';
+import '../../providers/transaction_repository_provider.dart';
 
-class TransactionDetailsPage extends StatelessWidget {
+class TransactionDetailsPage extends ConsumerWidget {
   const TransactionDetailsPage({
     super.key,
     required this.transaction,
@@ -11,11 +18,10 @@ class TransactionDetailsPage extends StatelessWidget {
 
   final TransactionWithDetails transaction;
 
-  bool get isExpense =>
-      transaction.transaction.type == 'expense';
+  bool get isExpense => transaction.transaction.type == 'expense';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
 
     final amount = transaction.transaction.amount;
@@ -33,9 +39,7 @@ class TransactionDetailsPage extends StatelessWidget {
           centerTitle: true,
 
           leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_rounded,
-            ),
+            icon: const Icon(Icons.arrow_back_rounded),
             onPressed: () {
               if (context.canPop()) {
                 context.pop();
@@ -75,9 +79,7 @@ class TransactionDetailsPage extends StatelessWidget {
                           ? Icons.arrow_downward_rounded
                           : Icons.arrow_upward_rounded,
                       size: 30,
-                      color: isExpense
-                          ? colors.error
-                          : colors.primary,
+                      color: isExpense ? colors.error : colors.primary,
                     ),
                   ),
 
@@ -85,28 +87,20 @@ class TransactionDetailsPage extends StatelessWidget {
 
                   Text(
                     isExpense ? 'مصروف' : 'دخل',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(
-                          color: colors.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colors.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
 
                   const SizedBox(height: 8),
 
                   Text(
                     amountText,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineMedium
-                        ?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: isExpense
-                              ? colors.error
-                              : colors.primary,
-                        ),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: isExpense ? colors.error : colors.primary,
+                    ),
                   ),
                 ],
               ),
@@ -132,7 +126,7 @@ class TransactionDetailsPage extends StatelessWidget {
                     value: transaction.category.name,
                   ),
 
-                  _Divider(),
+                  const _Divider(),
 
                   _DetailRow(
                     icon: Icons.account_balance_wallet_outlined,
@@ -140,7 +134,7 @@ class TransactionDetailsPage extends StatelessWidget {
                     value: transaction.account.name,
                   ),
 
-                  _Divider(),
+                  const _Divider(),
 
                   _DetailRow(
                     icon: Icons.calendar_today_outlined,
@@ -152,7 +146,7 @@ class TransactionDetailsPage extends StatelessWidget {
 
                   if (transaction.transaction.note != null &&
                       transaction.transaction.note!.trim().isNotEmpty) ...[
-                    _Divider(),
+                    const _Divider(),
 
                     _DetailRow(
                       icon: Icons.notes_outlined,
@@ -173,14 +167,13 @@ class TransactionDetailsPage extends StatelessWidget {
               height: 52,
               child: OutlinedButton.icon(
                 onPressed: () {
-                  // هنضيف التعديل في المرحلة القادمة.
+                  context.push(
+                    '/transactions/edit',
+                    extra: transaction,
+                  );
                 },
-                icon: const Icon(
-                  Icons.edit_outlined,
-                ),
-                label: const Text(
-                  'تعديل العملية',
-                ),
+                icon: const Icon(Icons.edit_outlined),
+                label: const Text('تعديل العملية'),
               ),
             ),
 
@@ -193,7 +186,7 @@ class TransactionDetailsPage extends StatelessWidget {
               height: 52,
               child: OutlinedButton.icon(
                 onPressed: () {
-                  // هنضيف الحذف في المرحلة القادمة.
+                  _deleteTransaction(context, ref);
                 },
                 icon: Icon(
                   Icons.delete_outline_rounded,
@@ -211,6 +204,76 @@ class TransactionDetailsPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _deleteTransaction(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('حذف العملية'),
+          content: const Text(
+            'هل أنت متأكد من حذف هذه العملية؟\n'
+            'سيتم تعديل رصيد الحساب تلقائيًا.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false);
+              },
+              child: const Text('إلغاء'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
+              },
+              child: const Text('حذف'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await ref
+          .read(transactionRepositoryProvider)
+          .deleteTransaction(
+            transactionId: transaction.transaction.id,
+          );
+
+      if (!context.mounted) return;
+
+      // =========================
+      // Refresh dashboard
+      // =========================
+      ref.invalidate(dashboardProvider);
+      ref.invalidate(dashboardSummaryProvider);
+
+      // =========================
+      // Refresh transactions
+      // =========================
+      ref.invalidate(recentTransactionsWithDetailsProvider);
+      ref.invalidate(allTransactionsWithDetailsProvider);
+      ref.invalidate(paginatedTransactionsProvider);
+
+      // =========================
+      // Back to transactions
+      // =========================
+      context.pop();
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('حدث خطأ أثناء حذف العملية'),
+        ),
+      );
+    }
   }
 
   String _formatDate(DateTime date) {
@@ -253,29 +316,22 @@ class _DetailRow extends StatelessWidget {
 
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
                 ),
 
                 const SizedBox(height: 4),
 
                 Text(
                   value,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -287,15 +343,15 @@ class _DetailRow extends StatelessWidget {
 }
 
 class _Divider extends StatelessWidget {
+  const _Divider();
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
     return Divider(
       height: 1,
-      color: colors.outlineVariant.withValues(
-        alpha: 0.5,
-      ),
+      color: colors.outlineVariant.withValues(alpha: 0.5),
     );
   }
 }

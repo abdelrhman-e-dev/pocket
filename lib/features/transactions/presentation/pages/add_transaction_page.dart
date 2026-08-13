@@ -5,7 +5,7 @@ import '../../../../shared/components/buttons/primary_button.dart';
 import '../../models/transaction_type.dart';
 import '../../providers/transaction_type_provider.dart';
 import '../../providers/transaction_accounts_provider.dart';
-import '../../providers/transaction_repository_provider.dart';
+import '../../providers/transaction_repository_provider.dart' as repo;
 import 'package:go_router/go_router.dart';
 import '../../../dashboard/providers/dashboard_provider.dart';
 import '../../../dashboard/providers/dashboard_summary_provider.dart'
@@ -14,9 +14,12 @@ import '../widgets/transaction_header.dart';
 import '../../../../shared/components/text_fields/amount_field.dart';
 import '../widgets/transaction_category_grid.dart';
 import '../../providers/all_transactions_provider.dart';
-
+import '../../models/transaction_with_details.dart';
+import '../../providers/paginated_transactions_provider.dart';
 class AddTransactionPage extends ConsumerStatefulWidget {
-  const AddTransactionPage({super.key});
+  const AddTransactionPage({super.key, this.transaction});
+
+  final TransactionWithDetails? transaction;
 
   @override
   ConsumerState<AddTransactionPage> createState() => _AddTransactionPageState();
@@ -24,7 +27,7 @@ class AddTransactionPage extends ConsumerStatefulWidget {
 
 class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   final _formKey = GlobalKey<FormState>();
-
+  bool get isEditMode => widget.transaction != null;
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
   final _noteFocusNode = FocusNode();
@@ -32,6 +35,35 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   int? _selectedAccountId;
   int? _selectedCategoryId;
   DateTime _selectedDate = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+
+    final transaction = widget.transaction;
+
+    if (transaction != null) {
+      _amountController.text = transaction.transaction.amount.toString();
+
+      _selectedAccountId = transaction.transaction.accountId;
+
+      _selectedCategoryId = transaction.transaction.categoryId;
+
+      _selectedDate = transaction.transaction.transactionDate;
+
+      _notesController.text = transaction.transaction.note ?? '';
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
+        ref
+            .read(transactionTypeProvider.notifier)
+            .state = transaction.transaction.type == 'expense'
+            ? TransactionType.expense
+            : TransactionType.income;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -504,41 +536,54 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
                 final note = _notesController.text.trim();
 
-              try {
-  await ref
-      .read(transactionRepositoryProvider)
-      .createTransaction(
-        accountId: _selectedAccountId!,
-        categoryId: _selectedCategoryId!,
-        type: type,
-        amount: amount,
-        note: note.isEmpty ? null : note,
-        transactionDate: _selectedDate,
-      );
+                try {
+                  final repository = ref.read(
+                    repo.transactionRepositoryProviderPage,
+                  );
 
-  if (!context.mounted) return;
+                  if (isEditMode) {
+                    await repository.updateTransaction(
+                      transactionId: widget.transaction!.transaction.id,
+                      accountId: _selectedAccountId!,
+                      categoryId: _selectedCategoryId!,
+                      type: type,
+                      amount: amount,
+                      note: note.isEmpty ? null : note,
+                      transactionDate: _selectedDate,
+                    );
+                  } else {
+                    await repository.createTransaction(
+                      accountId: _selectedAccountId!,
+                      categoryId: _selectedCategoryId!,
+                      type: type,
+                      amount: amount,
+                      note: note.isEmpty ? null : note,
+                      transactionDate: _selectedDate,
+                    );
+                  }
 
-  // تحديث Dashboard
-  ref.invalidate(dashboardProvider);
-  ref.invalidate(dashboardSummaryProvider);
+                  if (!context.mounted) return;
 
-  // تحديث أرصدة الحسابات
-  ref.invalidate(transactionAccountsProvider);
+                  // تحديث Dashboard
+                  ref.invalidate(dashboardProvider);
+                  ref.invalidate(dashboardSummaryProvider);
 
-  // تحديث سجل العمليات
-  ref.invalidate(allTransactionsWithDetailsProvider);
+                  // تحديث أرصدة الحسابات
+                  ref.invalidate(transactionAccountsProvider);
 
-  // الرجوع إلى صفحة العمليات
-  context.go('/transactions');
-} catch (e) {
-  if (!context.mounted) return;
+                  // تحديث سجل العمليات
+                  ref.invalidate(allTransactionsWithDetailsProvider);
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('خطأ: $e'),
-    ),
-  );
-}
+                  ref.invalidate(paginatedTransactionsProvider);
+                  // الرجوع إلى صفحة العمليات
+                  context.go('/transactions');
+                } catch (e) {
+                  if (!context.mounted) return;
+
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('خطأ: $e')));
+                }
               },
             ),
           ],
