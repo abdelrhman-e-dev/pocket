@@ -24,6 +24,14 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const TransactionsPage(),
     ),
     GoRoute(
+      path: '/transactions/edit',
+      builder: (context, state) {
+        final transaction = state.extra as TransactionWithDetails;
+
+        return AddTransactionPage(transaction: transaction);
+      },
+    ),
+    GoRoute(
       path: '/create-account',
       builder: (context, state) => const CreateAccountPage(),
     ),
@@ -35,10 +43,6 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/add-transaction',
       builder: (context, state) => const AddTransactionPage(),
-    ),
-    GoRoute(
-      path: '/transactions',
-      builder: (context, state) => const TransactionsPage(),
     ),
 
     GoRoute(
