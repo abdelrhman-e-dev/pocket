@@ -48,6 +48,117 @@ class TransactionRepository {
     });
   }
 
+  Future<void> updateTransaction({
+    required int transactionId,
+    required int accountId,
+    required int categoryId,
+    required String type,
+    required double amount,
+    String? note,
+    required DateTime transactionDate,
+  }) async {
+    await _database.transaction(() async {
+      // 1. Get the old transaction
+      final oldTransaction = await (_database.select(
+        _database.transactions,
+      )..where((table) => table.id.equals(transactionId))).getSingle();
+
+      // 2. Get the old account
+      final oldAccount =
+          await (_database.select(_database.accounts)
+                ..where((table) => table.id.equals(oldTransaction.accountId)))
+              .getSingle();
+
+      // 3. Restore the old transaction effect
+      //
+      // Old expense:
+      // account was reduced -> add it back
+      //
+      // Old income:
+      // account was increased -> subtract it
+      final restoredBalance = oldTransaction.type == 'expense'
+          ? oldAccount.currentBalance + oldTransaction.amount
+          : oldAccount.currentBalance - oldTransaction.amount;
+
+      // 4. If the account changed, restore the old
+      // account first.
+      await (_database.update(_database.accounts)
+            ..where((table) => table.id.equals(oldTransaction.accountId)))
+          .write(AccountsCompanion(currentBalance: Value(restoredBalance)));
+
+      // 5. Update the transaction itself
+      await (_database.update(
+        _database.transactions,
+      )..where((table) => table.id.equals(transactionId))).write(
+        TransactionsCompanion(
+          accountId: Value(accountId),
+          categoryId: Value(categoryId),
+          type: Value(type),
+          amount: Value(amount),
+          note: Value(note),
+          transactionDate: Value(transactionDate),
+        ),
+      );
+
+      // 6. Get the new account
+      final newAccount = await (_database.select(
+        _database.accounts,
+      )..where((table) => table.id.equals(accountId))).getSingle();
+
+      // 7. Apply the new transaction effect
+      final newBalance = type == 'expense'
+          ? newAccount.currentBalance - amount
+          : newAccount.currentBalance + amount;
+
+      // 8. Update the new account balance
+      await (_database.update(_database.accounts)
+            ..where((table) => table.id.equals(accountId)))
+          .write(AccountsCompanion(currentBalance: Value(newBalance)));
+    });
+  }
+Future<void> deleteTransaction({
+  required int transactionId,
+}) async {
+  await _database.transaction(() async {
+    // 1. Get the transaction before deleting it.
+    final transaction = await (_database.select(
+      _database.transactions,
+    )..where(
+        (table) => table.id.equals(transactionId),
+      )).getSingle();
+
+    // 2. Get the account affected by this transaction.
+    final account = await (_database.select(
+      _database.accounts,
+    )..where(
+        (table) => table.id.equals(transaction.accountId),
+      )).getSingle();
+
+    // 3. Restore the account balance.
+    final restoredBalance =
+        transaction.type == 'expense'
+            ? account.currentBalance + transaction.amount
+            : account.currentBalance - transaction.amount;
+
+    // 4. Restore the balance.
+    await (_database.update(
+      _database.accounts,
+    )..where(
+        (table) => table.id.equals(transaction.accountId),
+      )).write(
+      AccountsCompanion(
+        currentBalance: Value(restoredBalance),
+      ),
+    );
+
+    // 5. Delete the transaction.
+    await (_database.delete(
+      _database.transactions,
+    )..where(
+        (table) => table.id.equals(transactionId),
+      )).go();
+  });
+}
   Future<List<Transaction>> getRecentTransactions({int limit = 5}) async {
     return (_database.select(_database.transactions)
           ..orderBy([
@@ -94,86 +205,69 @@ class TransactionRepository {
     }).toList();
   }
 
-Future<List<TransactionWithDetails>> getTransactionsWithDetails({
-  String? type,
-  int limit = 10,
-  int offset = 0,
-  DateTime? startDate,
-  DateTime? endDate,
-}) async {
-  final query = _database.select(_database.transactions).join([
-    innerJoin(
-      _database.accounts,
-      _database.accounts.id.equalsExp(
-        _database.transactions.accountId,
-      ),
-    ),
-    innerJoin(
-      _database.categories,
-      _database.categories.id.equalsExp(
-        _database.transactions.categoryId,
-      ),
-    ),
-  ]);
-
-  // فلترة حسب النوع
-  if (type != null) {
-    query.where(
-      _database.transactions.type.equals(type),
-    );
-  }
-
-  // بداية الفترة
-  if (startDate != null) {
-    query.where(
-      _database.transactions.transactionDate
-          .isBiggerOrEqualValue(startDate),
-    );
-  }
-
-  // نهاية الفترة
-  if (endDate != null) {
-    query.where(
-      _database.transactions.transactionDate
-          .isSmallerThanValue(endDate),
-    );
-  }
-
-  query
-    ..orderBy([
-      OrderingTerm(
-        expression: _database.transactions.transactionDate,
-        mode: OrderingMode.desc,
-      ),
-    ])
-    ..limit(limit, offset: offset);
-
-  final rows = await query.get();
-
-  return rows.map((row) {
-    return TransactionWithDetails(
-      transaction: row.readTable(
-        _database.transactions,
-      ),
-      account: row.readTable(
+  Future<List<TransactionWithDetails>> getTransactionsWithDetails({
+    String? type,
+    int limit = 10,
+    int offset = 0,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    final query = _database.select(_database.transactions).join([
+      innerJoin(
         _database.accounts,
+        _database.accounts.id.equalsExp(_database.transactions.accountId),
       ),
-      category: row.readTable(
+      innerJoin(
         _database.categories,
+        _database.categories.id.equalsExp(_database.transactions.categoryId),
       ),
-    );
-  }).toList();
-}
+    ]);
 
-Future<List<TransactionWithDetails>> getAllTransactionsWithDetails({
-  String? type,
-}) async {
-  return getTransactionsWithDetails(
-    type: type,
-    limit: 100000,
-    offset: 0,
-  );
-}
+    // فلترة حسب النوع
+    if (type != null) {
+      query.where(_database.transactions.type.equals(type));
+    }
+
+    // بداية الفترة
+    if (startDate != null) {
+      query.where(
+        _database.transactions.transactionDate.isBiggerOrEqualValue(startDate),
+      );
+    }
+
+    // نهاية الفترة
+    if (endDate != null) {
+      query.where(
+        _database.transactions.transactionDate.isSmallerThanValue(endDate),
+      );
+    }
+
+    query
+      ..orderBy([
+        OrderingTerm(
+          expression: _database.transactions.transactionDate,
+          mode: OrderingMode.desc,
+        ),
+      ])
+      ..limit(limit, offset: offset);
+
+    final rows = await query.get();
+
+    return rows.map((row) {
+      return TransactionWithDetails(
+        transaction: row.readTable(_database.transactions),
+        account: row.readTable(_database.accounts),
+        category: row.readTable(_database.categories),
+      );
+    }).toList();
+  }
+
+  Future<List<TransactionWithDetails>> getAllTransactionsWithDetails({
+    String? type,
+  }) async {
+    return getTransactionsWithDetails(type: type, limit: 100000, offset: 0);
+  }
+
   Future<double> getCurrentMonthExpenses() async {
     final now = DateTime.now();
 
