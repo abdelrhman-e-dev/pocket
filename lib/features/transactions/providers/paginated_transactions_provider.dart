@@ -1,7 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/transaction_with_details.dart';
-import '../repositories/transaction_repository.dart';
+import '../models/transaction_filter.dart';
+import '../models/transaction_period_filter.dart';
+import 'transaction_filter_provider.dart';
+import 'transaction_period_filter_provider.dart';
 import 'transaction_repository_provider.dart';
 
 class PaginatedTransactionsState {
@@ -34,20 +38,83 @@ class PaginatedTransactionsState {
 
 class PaginatedTransactionsNotifier
     extends StateNotifier<PaginatedTransactionsState> {
-  PaginatedTransactionsNotifier(this._repository)
-      : super(const PaginatedTransactionsState()) {
-    loadInitial();
-  }
+  PaginatedTransactionsNotifier(
+    this._repository,
+    this._type,
+    this._period,
+    this._dateRange,
+  ) : super(const PaginatedTransactionsState());
 
-  final TransactionRepository _repository;
+  final dynamic _repository;
+  final TransactionFilter _type;
+  final TransactionPeriodFilter _period;
+  final DateTimeRange? _dateRange;
 
   static const int pageSize = 10;
 
-  Future<void> loadInitial({
-    String? type,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
+  String? get dbType {
+    return _type.dbType;
+  }
+
+  DateTime? get startDate {
+    final now = DateTime.now();
+
+    switch (_period) {
+      case TransactionPeriodFilter.today:
+        return DateTime(now.year, now.month, now.day);
+
+      case TransactionPeriodFilter.thisWeek:
+        final today = DateTime(now.year, now.month, now.day);
+
+        return today.subtract(Duration(days: today.weekday - 1));
+
+      case TransactionPeriodFilter.thisMonth:
+        return DateTime(now.year, now.month, 1);
+
+      case TransactionPeriodFilter.custom:
+        return _dateRange?.start;
+    }
+  }
+
+  DateTime? get endDate {
+    final now = DateTime.now();
+
+    switch (_period) {
+      case TransactionPeriodFilter.today:
+        return DateTime(now.year, now.month, now.day + 1);
+
+      case TransactionPeriodFilter.thisWeek:
+        final today = DateTime(now.year, now.month, now.day);
+
+        final start = today.subtract(Duration(days: today.weekday - 1));
+
+        return start.add(const Duration(days: 7));
+
+      case TransactionPeriodFilter.thisMonth:
+        return DateTime(now.year, now.month + 1, 1);
+
+      case TransactionPeriodFilter.custom:
+        if (_dateRange == null) return null;
+
+        return DateTime(
+          _dateRange.end.year,
+          _dateRange.end.month,
+          _dateRange.end.day + 1,
+        );
+    }
+  }
+
+  Future<List<TransactionWithDetails>> _fetch({required int offset}) {
+    return _repository.getTransactionsWithDetails(
+      type: dbType,
+      limit: pageSize,
+      offset: offset,
+      startDate: startDate,
+      endDate: endDate,
+    );
+  }
+
+  Future<void> loadInitial() async {
     state = state.copyWith(
       isLoading: true,
       isLoadingMore: false,
@@ -56,13 +123,7 @@ class PaginatedTransactionsNotifier
     );
 
     try {
-      final items = await _repository.getTransactionsWithDetails(
-        type: type,
-        limit: pageSize,
-        offset: 0,
-        startDate: startDate,
-        endDate: endDate,
-      );
+      final items = await _fetch(offset: 0);
 
       state = PaginatedTransactionsState(
         items: items,
@@ -71,58 +132,52 @@ class PaginatedTransactionsNotifier
         hasMore: items.length == pageSize,
       );
     } catch (_) {
-      state = state.copyWith(
-        isLoading: false,
-      );
-      rethrow;
+      state = state.copyWith(isLoading: false);
     }
   }
 
-  Future<void> loadMore({
-    String? type,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) async {
+  Future<void> loadMore() async {
     if (state.isLoadingMore || !state.hasMore) {
       return;
     }
 
-    state = state.copyWith(
-      isLoadingMore: true,
-    );
+    state = state.copyWith(isLoadingMore: true);
 
     try {
-      final newItems = await _repository.getTransactionsWithDetails(
-        type: type,
-        limit: pageSize,
-        offset: state.items.length,
-        startDate: startDate,
-        endDate: endDate,
-      );
-
-      final allItems = [
-        ...state.items,
-        ...newItems,
-      ];
+      final newItems = await _fetch(offset: state.items.length);
 
       state = state.copyWith(
-        items: allItems,
+        items: [...state.items, ...newItems],
         isLoadingMore: false,
         hasMore: newItems.length == pageSize,
       );
     } catch (_) {
-      state = state.copyWith(
-        isLoadingMore: false,
-      );
-      rethrow;
+      state = state.copyWith(isLoadingMore: false);
     }
   }
 }
 
-final paginatedTransactionsProvider = StateNotifierProvider<
-    PaginatedTransactionsNotifier,
-    PaginatedTransactionsState>((ref) {
-  final repository = ref.watch(transactionRepositoryProvider);
+final paginatedTransactionsProvider =
+    StateNotifierProvider<
+      PaginatedTransactionsNotifier,
+      PaginatedTransactionsState
+    >((ref) {
+      final repository = ref.watch(transactionRepositoryProvider);
 
-  return PaginatedTransactionsNotifier(repository);
-});
+      final type = ref.watch(transactionFilterProvider);
+
+      final period = ref.watch(transactionPeriodFilterProvider);
+
+      final dateRange = ref.watch(customTransactionDateRangeProvider);
+
+      final notifier = PaginatedTransactionsNotifier(
+        repository,
+        type,
+        period,
+        dateRange,
+      );
+
+      notifier.loadInitial();
+
+      return notifier;
+    });
