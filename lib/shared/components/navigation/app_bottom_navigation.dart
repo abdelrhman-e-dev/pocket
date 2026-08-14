@@ -45,10 +45,7 @@ class AppBottomNavigation extends StatelessWidget {
           decoration: BoxDecoration(
             color: colors.surfaceContainerLow,
             border: Border(
-              top: BorderSide(
-                color: colors.outlineVariant,
-                width: 1,
-              ),
+              top: BorderSide(color: colors.outlineVariant, width: 1),
             ),
           ),
           child: Row(
@@ -98,14 +95,9 @@ class _NavigationItemWidget extends StatelessWidget {
           curve: Curves.easeOut,
           width: 92,
           height: 60,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 6,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           decoration: BoxDecoration(
-            color: selected
-                ? colors.primaryContainer
-                : Colors.transparent,
+            color: selected ? colors.primaryContainer : Colors.transparent,
             borderRadius: BorderRadius.circular(14),
           ),
           child: Column(
@@ -127,8 +119,7 @@ class _NavigationItemWidget extends StatelessWidget {
                   color: selected
                       ? colors.onPrimaryContainer
                       : colors.onSurfaceVariant,
-                  fontWeight:
-                      selected ? FontWeight.w700 : FontWeight.w500,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),
             ],

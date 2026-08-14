@@ -20,10 +20,11 @@ class TransactionHeader extends StatelessWidget {
 
     return Column(
       children: [
+        const SizedBox(height: 12),
+
         // =========================
         // Header
         // =========================
-        const SizedBox(height: 12),
         Row(
           children: [
             IconButton(
@@ -75,6 +76,16 @@ class TransactionHeader extends StatelessWidget {
                   selected: selectedType == TransactionType.income,
                   onTap: () {
                     onTypeChanged(TransactionType.income);
+                  },
+                ),
+              ),
+
+              Expanded(
+                child: _TypeButton(
+                  title: 'تحويل',
+                  selected: selectedType == TransactionType.transfer,
+                  onTap: () {
+                    onTypeChanged(TransactionType.transfer);
                   },
                 ),
               ),
