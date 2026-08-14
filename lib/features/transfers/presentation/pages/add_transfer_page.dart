@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
+import '../../../dashboard/providers/dashboard_provider.dart';
+import '../../../dashboard/providers/dashboard_summary_provider.dart';
+import '../../../accounts/providers/account_repository_provider.dart';
 import '../../../transactions/providers/transaction_accounts_provider.dart';
 import '../../providers/transfer_repository_provider.dart';
 
@@ -9,8 +11,7 @@ class AddTransferPage extends ConsumerStatefulWidget {
   const AddTransferPage({super.key});
 
   @override
-  ConsumerState<AddTransferPage> createState() =>
-      _AddTransferPageState();
+  ConsumerState<AddTransferPage> createState() => _AddTransferPageState();
 }
 
 class _AddTransferPageState extends ConsumerState<AddTransferPage> {
@@ -38,11 +39,7 @@ class _AddTransferPageState extends ConsumerState<AddTransferPage> {
       context: context,
       initialDate: _selectedDate,
       firstDate: DateTime(2000),
-      lastDate: DateTime(
-        now.year,
-        now.month,
-        now.day,
-      ),
+      lastDate: DateTime(now.year, now.month, now.day),
     );
 
     if (selected == null) return;
@@ -72,9 +69,7 @@ class _AddTransferPageState extends ConsumerState<AddTransferPage> {
       return;
     }
 
-    final amount = double.tryParse(
-      _amountController.text.trim(),
-    );
+    final amount = double.tryParse(_amountController.text.trim());
 
     if (amount == null || amount <= 0) {
       _showMessage('من فضلك أدخل مبلغًا صحيحًا');
@@ -94,8 +89,10 @@ class _AddTransferPageState extends ConsumerState<AddTransferPage> {
             transferDate: _selectedDate,
           );
 
+      ref.invalidate(dashboardProvider);
+      ref.invalidate(accountsProvider);
+      ref.invalidate(dashboardSummaryProvider);
       if (!mounted) return;
-
       context.pop();
     } catch (e) {
       if (!mounted) return;
@@ -109,9 +106,9 @@ class _AddTransferPageState extends ConsumerState<AddTransferPage> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   String _formatDate(DateTime date) {
@@ -123,9 +120,7 @@ class _AddTransferPageState extends ConsumerState<AddTransferPage> {
 
   @override
   Widget build(BuildContext context) {
-    final accountsAsync = ref.watch(
-      transactionAccountsProvider,
-    );
+    final accountsAsync = ref.watch(transactionAccountsProvider);
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -140,15 +135,10 @@ class _AddTransferPageState extends ConsumerState<AddTransferPage> {
         ),
 
         body: accountsAsync.when(
-          loading: () => const Center(
-            child: CircularProgressIndicator(),
-          ),
+          loading: () => const Center(child: CircularProgressIndicator()),
 
-          error: (_, __) => const Center(
-            child: Text(
-              'حدث خطأ أثناء تحميل الحسابات',
-            ),
-          ),
+          error: (_, __) =>
+              const Center(child: Text('حدث خطأ أثناء تحميل الحسابات')),
 
           data: (accounts) {
             if (accounts.length < 2) {
@@ -197,8 +187,7 @@ class _AddTransferPageState extends ConsumerState<AddTransferPage> {
 
                   TextFormField(
                     controller: _amountController,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(
+                    keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
                     decoration: const InputDecoration(
@@ -207,9 +196,7 @@ class _AddTransferPageState extends ConsumerState<AddTransferPage> {
                       suffixText: 'ج.م',
                     ),
                     validator: (value) {
-                      final amount = double.tryParse(
-                        value?.trim() ?? '',
-                      );
+                      final amount = double.tryParse(value?.trim() ?? '');
 
                       if (amount == null || amount <= 0) {
                         return 'أدخل مبلغًا صحيحًا';
@@ -228,18 +215,16 @@ class _AddTransferPageState extends ConsumerState<AddTransferPage> {
                       border: OutlineInputBorder(),
                     ),
                     items: accounts
-                        .where(
-                          (account) =>
-                              account.id != _fromAccountId,
-                        )
+                        .where((account) => account.id != _fromAccountId)
                         .map((account) {
-                      return DropdownMenuItem<int>(
-                        value: account.id,
-                        child: Text(
-                          '${account.name} — ${account.currentBalance.toStringAsFixed(0)} ج.م',
-                        ),
-                      );
-                    }).toList(),
+                          return DropdownMenuItem<int>(
+                            value: account.id,
+                            child: Text(
+                              '${account.name} — ${account.currentBalance.toStringAsFixed(0)} ج.م',
+                            ),
+                          );
+                        })
+                        .toList(),
                     onChanged: (value) {
                       setState(() {
                         _toAccountId = value;
@@ -251,13 +236,9 @@ class _AddTransferPageState extends ConsumerState<AddTransferPage> {
 
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(
-                      Icons.calendar_today_outlined,
-                    ),
+                    leading: const Icon(Icons.calendar_today_outlined),
                     title: const Text('التاريخ'),
-                    subtitle: Text(
-                      _formatDate(_selectedDate),
-                    ),
+                    subtitle: Text(_formatDate(_selectedDate)),
                     onTap: _selectDate,
                   ),
 

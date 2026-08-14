@@ -16,6 +16,8 @@ import '../widgets/transaction_category_grid.dart';
 import '../../providers/all_transactions_provider.dart';
 import '../../models/transaction_with_details.dart';
 import '../../providers/paginated_transactions_provider.dart';
+import '../../../transfers/providers/transfer_repository_provider.dart';
+
 class AddTransactionPage extends ConsumerStatefulWidget {
   const AddTransactionPage({super.key, this.transaction});
 
@@ -33,8 +35,14 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
   final _noteFocusNode = FocusNode();
 
   int? _selectedAccountId;
+  int? _selectedToAccountId;
   int? _selectedCategoryId;
   DateTime _selectedDate = DateTime.now();
+  bool get isTransfer {
+    final type = ref.read(transactionTypeProvider);
+
+    return type == TransactionType.transfer;
+  }
 
   @override
   void initState() {
@@ -98,99 +106,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
     });
   }
 
-  Future<void> _showAccountPicker() async {
-    final accountsAsync = ref.read(transactionAccountsProvider);
-    final accounts = accountsAsync.valueOrNull ?? [];
-
-    if (accounts.isEmpty) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'لا توجد حسابات متاحة',
-            textDirection: TextDirection.rtl,
-          ),
-        ),
-      );
-
-      return;
-    }
-
-    final selectedId = await showModalBottomSheet<int>(
-      context: context,
-      showDragHandle: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              children: [
-                Text(
-                  'اختر الحساب',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                ...accounts.map((account) {
-                  final isSelected = account.id == _selectedAccountId;
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: ListTile(
-                      onTap: () {
-                        Navigator.pop(context, account.id);
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        side: BorderSide(
-                          color: isSelected
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.outlineVariant,
-                        ),
-                      ),
-                      leading: Icon(
-                        Icons.account_balance_wallet_rounded,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      title: Text(account.name, textAlign: TextAlign.right),
-                      subtitle: Text(
-                        '${account.currentBalance.toStringAsFixed(2)} جنيه',
-                        textAlign: TextAlign.right,
-                      ),
-                      trailing: isSelected
-                          ? Icon(
-                              Icons.check_circle_rounded,
-                              color: Theme.of(context).colorScheme.primary,
-                            )
-                          : null,
-                    ),
-                  );
-                }),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    if (selectedId == null) return;
-
-    setState(() {
-      _selectedAccountId = selectedId;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final selectedType = ref.watch(transactionTypeProvider);
@@ -203,6 +118,9 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         ?.where((account) => account.id == _selectedAccountId)
         .firstOrNull;
 
+    final selectedToAccount = accounts
+        ?.where((account) => account.id == _selectedToAccountId)
+        .firstOrNull;
     return Scaffold(
       body: Form(
         key: _formKey,
@@ -218,6 +136,8 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
 
                 setState(() {
                   _selectedCategoryId = null;
+                  _selectedAccountId = null;
+                  _selectedToAccountId = null;
                 });
               },
               onSave: () {
@@ -239,33 +159,39 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
             // =========================
             // categories
             // =========================
-            const SizedBox(height: 24),
+            if (!isTransfer) ...[
+              const SizedBox(height: 24),
 
-            const Text(
-              'التصنيف',
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.right,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal),
-            ),
-            const SizedBox(height: 12),
-            categoriesAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stackTrace) => Text(
-                'حدث خطأ أثناء تحميل التصنيفات',
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              const Text(
+                'التصنيف',
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.right,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal),
               ),
-              data: (categories) {
-                return TransactionCategoryGrid(
-                  categories: categories,
-                  selectedCategoryId: _selectedCategoryId,
-                  onCategorySelected: (categoryId) {
-                    setState(() {
-                      _selectedCategoryId = categoryId;
-                    });
-                  },
-                );
-              },
-            ),
+
+              const SizedBox(height: 12),
+
+              categoriesAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+
+                error: (error, stackTrace) => Text(
+                  'حدث خطأ أثناء تحميل التصنيفات',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+
+                data: (categories) {
+                  return TransactionCategoryGrid(
+                    categories: categories,
+                    selectedCategoryId: _selectedCategoryId,
+                    onCategorySelected: (categoryId) {
+                      setState(() {
+                        _selectedCategoryId = categoryId;
+                      });
+                    },
+                  );
+                },
+              ),
+            ],
 
             const SizedBox(height: 16),
 
@@ -286,76 +212,36 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   // =========================
                   // Account
                   // =========================
-                  InkWell(
-                    onTap: _showAccountPicker,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      child: Row(
-                        textDirection: TextDirection.rtl,
-                        children: [
-                          // Icon - Right
-                          _DetailIcon(
-                            icon: Icons.account_balance_wallet_rounded,
-                          ),
-
-                          const SizedBox(width: 12),
-
-                          // Text - Center
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  'الحساب',
-                                  textDirection: TextDirection.rtl,
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSurface,
-                                      ),
-                                ),
-
-                                const SizedBox(height: 3),
-
-                                Text(
-                                  selectedAccount?.name ?? 'اختر الحساب',
-                                  textDirection: TextDirection.rtl,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(
-                                        color: selectedAccount == null
-                                            ? Theme.of(
-                                                context,
-                                              ).colorScheme.onSurfaceVariant
-                                            : Theme.of(
-                                                context,
-                                              ).colorScheme.onSurfaceVariant,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(width: 12),
-
-                          // Arrow - Left
-                          Icon(
-                            Icons.chevron_left_rounded,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                            size: 22,
-                          ),
-                        ],
+                  if (isTransfer) ...[
+                    InkWell(
+                      onTap: () => _showAccountPicker(isFromAccount: true),
+                      child: _AccountDetailRow(
+                        icon: Icons.arrow_upward_rounded,
+                        title: 'من الحساب',
+                        value: selectedAccount?.name ?? 'اختر الحساب',
                       ),
                     ),
-                  ),
+
+                    Divider(
+                      height: 1,
+                      indent: 16,
+                      endIndent: 16,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outlineVariant.withValues(alpha: 0.6),
+                    ),
+
+                    InkWell(
+                      onTap: () => _showAccountPicker(isFromAccount: false),
+                      child: _AccountDetailRow(
+                        icon: Icons.arrow_downward_rounded,
+                        title: 'إلى الحساب',
+                        value: selectedToAccount?.name ?? 'اختر الحساب',
+                      ),
+                    ),
+                  ] else ...[
+                    // بلوك الحساب الحالي كما هو
+                  ],
 
                   Divider(
                     height: 1,
@@ -511,7 +397,6 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 if (!_formKey.currentState!.validate()) {
                   return;
                 }
-
                 if (_selectedAccountId == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('من فضلك اختر الحساب')),
@@ -520,12 +405,34 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   return;
                 }
 
-                if (_selectedCategoryId == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('من فضلك اختر التصنيف')),
-                  );
+                if (selectedType == TransactionType.transfer) {
+                  if (_selectedToAccountId == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('من فضلك اختر الحساب المستلم'),
+                      ),
+                    );
 
-                  return;
+                    return;
+                  }
+
+                  if (_selectedAccountId == _selectedToAccountId) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('لا يمكن التحويل إلى نفس الحساب'),
+                      ),
+                    );
+
+                    return;
+                  }
+                } else {
+                  if (_selectedCategoryId == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('من فضلك اختر التصنيف')),
+                    );
+
+                    return;
+                  }
                 }
 
                 final amount = double.parse(_amountController.text.trim());
@@ -537,45 +444,53 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                 final note = _notesController.text.trim();
 
                 try {
-                  final repository = ref.read(
-                    repo.transactionRepositoryProviderPage,
-                  );
+                  if (selectedType == TransactionType.transfer) {
+                    final transferRepository = ref.read(
+                      transferRepositoryProvider,
+                    );
 
-                  if (isEditMode) {
-                    await repository.updateTransaction(
-                      transactionId: widget.transaction!.transaction.id,
-                      accountId: _selectedAccountId!,
-                      categoryId: _selectedCategoryId!,
-                      type: type,
+                    await transferRepository.createTransfer(
+                      fromAccountId: _selectedAccountId!,
+                      toAccountId: _selectedToAccountId!,
                       amount: amount,
                       note: note.isEmpty ? null : note,
-                      transactionDate: _selectedDate,
+                      transferDate: _selectedDate,
                     );
                   } else {
-                    await repository.createTransaction(
-                      accountId: _selectedAccountId!,
-                      categoryId: _selectedCategoryId!,
-                      type: type,
-                      amount: amount,
-                      note: note.isEmpty ? null : note,
-                      transactionDate: _selectedDate,
+                    final repository = ref.read(
+                      repo.transactionRepositoryProviderPage,
                     );
+
+                    if (isEditMode) {
+                      await repository.updateTransaction(
+                        transactionId: widget.transaction!.transaction.id,
+                        accountId: _selectedAccountId!,
+                        categoryId: _selectedCategoryId!,
+                        type: type,
+                        amount: amount,
+                        note: note.isEmpty ? null : note,
+                        transactionDate: _selectedDate,
+                      );
+                    } else {
+                      await repository.createTransaction(
+                        accountId: _selectedAccountId!,
+                        categoryId: _selectedCategoryId!,
+                        type: type,
+                        amount: amount,
+                        note: note.isEmpty ? null : note,
+                        transactionDate: _selectedDate,
+                      );
+                    }
                   }
 
                   if (!context.mounted) return;
 
-                  // تحديث Dashboard
                   ref.invalidate(dashboardProvider);
                   ref.invalidate(dashboardSummaryProvider);
-
-                  // تحديث أرصدة الحسابات
                   ref.invalidate(transactionAccountsProvider);
-
-                  // تحديث سجل العمليات
                   ref.invalidate(allTransactionsWithDetailsProvider);
-
                   ref.invalidate(paginatedTransactionsProvider);
-                  // الرجوع إلى صفحة العمليات
+                  ref.invalidate(transferRepositoryProvider);
                   context.go('/transactions');
                 } catch (e) {
                   if (!context.mounted) return;
@@ -590,6 +505,125 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _showAccountPicker({required bool isFromAccount}) async {
+    final accountsAsync = ref.read(transactionAccountsProvider);
+    final accounts = accountsAsync.valueOrNull ?? [];
+
+    if (accounts.isEmpty) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'لا توجد حسابات متاحة',
+            textDirection: TextDirection.rtl,
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    final selectedId = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              children: [
+                Text(
+                  isFromAccount ? 'اختر حساب المصدر' : 'اختر الحساب المستلم',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                ...accounts.map((account) {
+                  final selectedId = isFromAccount
+                      ? _selectedAccountId
+                      : _selectedToAccountId;
+
+                  final isSelected = account.id == selectedId;
+
+                  // في التحويل لا نسمح بنفس الحساب
+                  final otherAccountId = isFromAccount
+                      ? _selectedToAccountId
+                      : _selectedAccountId;
+
+                  final isDisabled = account.id == otherAccountId;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: ListTile(
+                      enabled: !isDisabled,
+
+                      onTap: isDisabled
+                          ? null
+                          : () {
+                              Navigator.pop(context, account.id);
+                            },
+
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        side: BorderSide(
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.outlineVariant,
+                        ),
+                      ),
+
+                      leading: Icon(
+                        Icons.account_balance_wallet_rounded,
+                        color: isDisabled
+                            ? Theme.of(context).colorScheme.onSurfaceVariant
+                            : Theme.of(context).colorScheme.primary,
+                      ),
+
+                      title: Text(account.name, textAlign: TextAlign.right),
+
+                      subtitle: Text(
+                        '${account.currentBalance.toStringAsFixed(2)} جنيه',
+                        textAlign: TextAlign.right,
+                      ),
+
+                      trailing: isSelected
+                          ? Icon(
+                              Icons.check_circle_rounded,
+                              color: Theme.of(context).colorScheme.primary,
+                            )
+                          : null,
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (selectedId == null) return;
+
+    setState(() {
+      if (isFromAccount) {
+        _selectedAccountId = selectedId;
+      } else {
+        _selectedToAccountId = selectedId;
+      }
+    });
   }
 }
 
@@ -610,6 +644,62 @@ class _DetailIcon extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       child: Icon(icon, size: 22, color: colors.primary),
+    );
+  }
+}
+
+class _AccountDetailRow extends StatelessWidget {
+  const _AccountDetailRow({
+    required this.icon,
+    required this.title,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String title;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        textDirection: TextDirection.rtl,
+        children: [
+          _DetailIcon(icon: icon),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+
+                const SizedBox(height: 3),
+
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          Icon(Icons.chevron_left_rounded, color: colors.onSurfaceVariant),
+        ],
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/database/app_database.dart';
 
@@ -26,13 +27,15 @@ class DashboardAccounts extends StatelessWidget {
             Text(
               'الحسابات',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colors.onSurface,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: colors.onSurface,
+              ),
             ),
 
             TextButton(
-              onPressed: onViewAll,
+              onPressed: () {
+                context.push('/accounts');
+              },
               child: const Text('عرض الكل'),
             ),
           ],
@@ -50,9 +53,7 @@ class DashboardAccounts extends StatelessWidget {
             itemBuilder: (context, index) {
               final account = accounts[index];
 
-              return _AccountCard(
-                account: account,
-              );
+              return _AccountCard(account: account);
             },
           ),
         ),
@@ -62,9 +63,7 @@ class DashboardAccounts extends StatelessWidget {
 }
 
 class _AccountCard extends StatelessWidget {
-  const _AccountCard({
-    required this.account,
-  });
+  const _AccountCard({required this.account});
 
   final Account account;
 
@@ -128,9 +127,7 @@ class _AccountCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colors.outlineVariant,
-        ),
+        border: Border.all(color: colors.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,10 +150,7 @@ class _AccountCard extends StatelessWidget {
 
               const Spacer(),
 
-              Icon(
-                Icons.more_horiz_rounded,
-                color: colors.onSurfaceVariant,
-              ),
+              Icon(Icons.more_horiz_rounded, color: colors.onSurfaceVariant),
             ],
           ),
 
@@ -166,9 +160,9 @@ class _AccountCard extends StatelessWidget {
             account.name,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 2),
@@ -177,9 +171,9 @@ class _AccountCard extends StatelessWidget {
             _getAccountTypeName(account.type),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
           ),
 
           const SizedBox(height: 6),
@@ -189,9 +183,9 @@ class _AccountCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: colors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: colors.primary,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),

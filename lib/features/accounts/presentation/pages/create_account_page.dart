@@ -10,6 +10,7 @@ import '../../../../shared/components/buttons/primary_button.dart';
 import '../../../../shared/components/cards/account_type_card.dart';
 import '../../../../shared/components/text_fields/app_text_field.dart';
 import '../../../dashboard/providers/dashboard_provider.dart';
+import '../../providers/account_repository_provider.dart';
 
 class CreateAccountPage extends ConsumerStatefulWidget {
   const CreateAccountPage({super.key});
@@ -54,7 +55,7 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                 // title
                 // =========================================
                 const Text(
-                  'إنشاء حسابك الأول',
+                  'إنشاء حساب جديد',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: AppTheme.textColor,
@@ -66,7 +67,7 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                 const SizedBox(height: 8),
 
                 const Text(
-                  'أضف حسابك الأول وابدأ في إدارة أموالك بسهولة',
+                  'أضف حساب جديد وابدأ في إدارة أموالك بسهولة',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: AppTheme.subtitleColor,
@@ -264,7 +265,6 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                 // =========================================
                 // create account button
                 // =========================================
-                
                 PrimaryButton(
                   text: 'إنشاء الحساب',
                   onPressed: () async {
@@ -283,13 +283,10 @@ class _CreateAccountPageState extends ConsumerState<CreateAccountPage> {
                     );
 
                     await ref.read(createAccountProvider(request).future);
-
                     if (!context.mounted) {
                       return;
                     }
-
-                    // Invalidate the dashboard cache so it refetches the
-                    // updated account list instead of showing the empty state.
+                    ref.invalidate(accountsProvider);
                     ref.invalidate(dashboardProvider);
 
                     ScaffoldMessenger.of(context).showSnackBar(
