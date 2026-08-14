@@ -8,6 +8,7 @@ import '../../features/transactions/presentation/pages/add_transaction_page.dart
 import '../../features/transactions/presentation/pages/transactions_page.dart';
 import '../../features/transactions/presentation/pages/transaction_details_page.dart';
 import '../../features/transactions/models/transaction_with_details.dart';
+import '../../features/transfers/presentation/pages/add_transfer_page.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: '/',
@@ -30,6 +31,10 @@ final GoRouter router = GoRouter(
 
         return AddTransactionPage(transaction: transaction);
       },
+    ),
+    GoRoute(
+      path: '/add-transfer',
+      builder: (context, state) => const AddTransferPage(),
     ),
     GoRoute(
       path: '/create-account',
