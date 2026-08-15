@@ -10,7 +10,7 @@ import '../../features/transactions/presentation/pages/transaction_details_page.
 import '../../features/transactions/models/transaction_with_details.dart';
 import '../../features/transfers/presentation/pages/add_transfer_page.dart';
 import '../../features/accounts/presentation/pages/accounts_page.dart';
-
+import '../../features/transfers/models/transfer_with_details.dart';
 final GoRouter router = GoRouter(
   initialLocation: '/',
 
@@ -40,6 +40,14 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/add-transfer',
       builder: (context, state) => const AddTransferPage(),
+    ),
+    GoRoute(
+      path: '/transfers/edit',
+      builder: (context, state) {
+        final transfer = state.extra as TransferWithDetails;
+
+        return AddTransferPage(transfer: transfer);
+      },
     ),
     GoRoute(
       path: '/create-account',
