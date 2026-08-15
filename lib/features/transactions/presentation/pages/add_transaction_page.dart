@@ -17,7 +17,7 @@ import '../../providers/all_transactions_provider.dart';
 import '../../models/transaction_with_details.dart';
 import '../../providers/paginated_transactions_provider.dart';
 import '../../../transfers/providers/transfer_repository_provider.dart';
-
+import '../../../accounts/providers/account_repository_provider.dart';
 class AddTransactionPage extends ConsumerStatefulWidget {
   const AddTransactionPage({super.key, this.transaction});
 
@@ -240,7 +240,14 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                       ),
                     ),
                   ] else ...[
-                    // بلوك الحساب الحالي كما هو
+                    InkWell(
+                      onTap: () => _showAccountPicker(isFromAccount: true),
+                      child: _AccountDetailRow(
+                        icon: Icons.account_balance_wallet_rounded,
+                        title: 'الحساب',
+                        value: selectedAccount?.name ?? 'اختر الحساب',
+                      ),
+                    ),
                   ],
 
                   Divider(
@@ -491,6 +498,7 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                   ref.invalidate(allTransactionsWithDetailsProvider);
                   ref.invalidate(paginatedTransactionsProvider);
                   ref.invalidate(transferRepositoryProvider);
+                  ref.invalidate(accountRepositoryProvider);
                   context.go('/transactions');
                 } catch (e) {
                   if (!context.mounted) return;
