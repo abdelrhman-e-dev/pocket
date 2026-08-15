@@ -283,73 +283,45 @@ class TransferRepository {
     });
   }
   // ============================================================
-// Delete Transfer
-// ============================================================
+  // Delete Transfer
+  // ============================================================
 
-Future<void> deleteTransfer({
-  required int transferId,
-}) async {
-  await _database.transaction(() async {
-    // 1. Get transfer
-    final transfer = await (_database.select(
-      _database.transfers,
-    )..where((table) => table.id.equals(transferId))).getSingle();
+  Future<void> deleteTransfer({required int transferId}) async {
+    await _database.transaction(() async {
+      // 1. Get transfer
+      final transfer = await (_database.select(
+        _database.transfers,
+      )..where((table) => table.id.equals(transferId))).getSingle();
 
-    // 2. Get source account
-    final fromAccount = await (_database.select(
-      _database.accounts,
-    )..where((table) => table.id.equals(transfer.fromAccountId)))
-        .getSingle();
+      // 2. Get source account
+      final fromAccount = await (_database.select(
+        _database.accounts,
+      )..where((table) => table.id.equals(transfer.fromAccountId))).getSingle();
 
-    // 3. Get destination account
-    final toAccount = await (_database.select(
-      _database.accounts,
-    )..where((table) => table.id.equals(transfer.toAccountId)))
-        .getSingle();
+      // 3. Get destination account
+      final toAccount = await (_database.select(
+        _database.accounts,
+      )..where((table) => table.id.equals(transfer.toAccountId))).getSingle();
 
-    // ========================================================
-    // 4. Undo transfer effect
-    // ========================================================
+      // 4. Reverse the original transfer
+      final newFromBalance = fromAccount.currentBalance + transfer.amount;
 
-    final newFromBalance =
-        fromAccount.currentBalance + transfer.amount;
+      final newToBalance = toAccount.currentBalance - transfer.amount;
 
-    final newToBalance =
-        toAccount.currentBalance - transfer.amount;
+      // 5. Restore source account
+      await (_database.update(_database.accounts)
+            ..where((table) => table.id.equals(transfer.fromAccountId)))
+          .write(AccountsCompanion(currentBalance: Value(newFromBalance)));
 
-    // ========================================================
-    // 5. Restore source account
-    // ========================================================
+      // 6. Restore destination account
+      await (_database.update(_database.accounts)
+            ..where((table) => table.id.equals(transfer.toAccountId)))
+          .write(AccountsCompanion(currentBalance: Value(newToBalance)));
 
-    await (_database.update(
-      _database.accounts,
-    )..where((table) => table.id.equals(transfer.fromAccountId)))
-        .write(
-      AccountsCompanion(
-        currentBalance: Value(newFromBalance),
-      ),
-    );
-
-    // ========================================================
-    // 6. Restore destination account
-    // ========================================================
-
-    await (_database.update(
-      _database.accounts,
-    )..where((table) => table.id.equals(transfer.toAccountId)))
-        .write(
-      AccountsCompanion(
-        currentBalance: Value(newToBalance),
-      ),
-    );
-
-    // ========================================================
-    // 7. Delete transfer
-    // ========================================================
-
-    await (_database.delete(
-      _database.transfers,
-    )..where((table) => table.id.equals(transferId))).go();
-  });
-}
+      // 7. Delete transfer
+      await (_database.delete(
+        _database.transfers,
+      )..where((table) => table.id.equals(transferId))).go();
+    });
+  }
 }
