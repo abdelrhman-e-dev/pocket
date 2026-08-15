@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../dashboard/providers/dashboard_summary_provider.dart';
-import '../../models/transaction_with_details.dart';
-import '../../providers/paginated_transactions_provider.dart';
+import '../../models/activity_item.dart';
+import '../../providers/filtered_transactions_provider.dart';
 import '../widgets/transaction_filter_chips.dart';
 import '../widgets/transaction_list_tile.dart';
 import '../widgets/transactions_summary_card.dart';
@@ -14,31 +14,19 @@ import '../widgets/transaction_period_filter.dart';
 class TransactionsPage extends ConsumerWidget {
   const TransactionsPage({super.key});
 
-  Map<String, List<TransactionWithDetails>> _groupByDate(
-    List<TransactionWithDetails> items,
-  ) {
+  Map<String, List<ActivityItem>> _groupByDate(List<ActivityItem> items) {
     final now = DateTime.now();
 
-    final today = DateTime(
-      now.year,
-      now.month,
-      now.day,
-    );
+    final today = DateTime(now.year, now.month, now.day);
 
-    final yesterday = today.subtract(
-      const Duration(days: 1),
-    );
+    final yesterday = today.subtract(const Duration(days: 1));
 
-    final grouped = <String, List<TransactionWithDetails>>{};
+    final grouped = <String, List<ActivityItem>>{};
 
     for (final item in items) {
-      final date = item.transaction.transactionDate;
+      final date = item.date;
 
-      final day = DateTime(
-        date.year,
-        date.month,
-        date.day,
-      );
+      final day = DateTime(date.year, date.month, date.day);
 
       final String label;
 
@@ -50,34 +38,18 @@ class TransactionsPage extends ConsumerWidget {
         label = '${date.day}/${date.month}/${date.year}';
       }
 
-      grouped.putIfAbsent(
-        label,
-        () => [],
-      ).add(item);
+      grouped.putIfAbsent(label, () => []).add(item);
     }
 
     return grouped;
   }
 
   @override
-  Widget build(
-    BuildContext context,
-    WidgetRef ref,
-  ) {
-    final paginationState =
-        ref.watch(paginatedTransactionsProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activitiesAsync = ref.watch(filteredActivitiesProvider);
+    final summaryAsync = ref.watch(dashboardSummaryProvider);
 
-    final summaryAsync =
-        ref.watch(dashboardSummaryProvider);
-
-    final colors =
-        Theme.of(context).colorScheme;
-
-    final transactions =
-        paginationState.items;
-
-    final grouped =
-        _groupByDate(transactions);
+    final colors = Theme.of(context).colorScheme;
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -89,9 +61,7 @@ class TransactionsPage extends ConsumerWidget {
           centerTitle: true,
 
           leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back,
-            ),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               if (context.canPop()) {
                 context.pop();
@@ -102,157 +72,197 @@ class TransactionsPage extends ConsumerWidget {
           ),
         ),
 
-        body: paginationState.isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : ListView(
-                padding: const EdgeInsets.all(20),
+        body: activitiesAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(
+            child: Text('حدث خطأ: $error'),
+          ),
+          data: (activities) {
+            final grouped = _groupByDate(activities);
 
-                children: [
-                  // =========================
-                  // Summary
-                  // =========================
-                  summaryAsync.when(
-                    loading: () => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
+            return ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                // =========================
+                // Summary
+                // =========================
+                summaryAsync.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
 
-                    error: (_, __) =>
-                        const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
 
-                    data: (summary) =>
-                        TransactionsSummaryCard(
-                      income: summary.income,
-                      expenses: summary.expenses,
-                    ),
+                  data: (summary) => TransactionsSummaryCard(
+                    income: summary.income,
+                    expenses: summary.expenses,
                   ),
+                ),
 
-                  const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-                  // =========================
-                  // Type Filter
-                  // =========================
-                  const TransactionFilterChips(),
+                // =========================
+                // Type Filter
+                // =========================
+                const TransactionFilterChips(),
 
-                  const SizedBox(height: 12),
+                const SizedBox(height: 12),
 
-                  // =========================
-                  // Period Filter
-                  // =========================
-                  const Align(
-                    alignment: Alignment.centerRight,
-                    child:
-                        TransactionPeriodFilterDropdown(),
-                  ),
+                // =========================
+                // Period Filter
+                // =========================
+                const Align(
+                  alignment: Alignment.centerRight,
+                  child: TransactionPeriodFilterDropdown(),
+                ),
 
-                  const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-                  // =========================
-                  // Empty State
-                  // =========================
-                  if (transactions.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.only(
-                        top: 60,
+                // =========================
+                // Empty State
+                // =========================
+                if (activities.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 60),
+                    child: Center(
+                      child: Text(
+                        'لا توجد عمليات حتى الآن',
+                        textAlign: TextAlign.center,
                       ),
-                      child: Center(
-                        child: Text(
-                          'لا توجد عمليات حتى الآن',
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    )
-
-                  // =========================
-                  // Transactions
-                  // =========================
-                  else ...[
-                    ...grouped.entries.expand(
-                      (entry) {
-                        return [
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(
-                              bottom: 10,
-                            ),
-                            child: Text(
-                              entry.key,
-                              style: Theme.of(
-                                context,
-                              )
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(
-                                    fontWeight:
-                                        FontWeight.bold,
-                                    color: colors
-                                        .onSurfaceVariant,
-                                  ),
-                            ),
-                          ),
-
-                          ...entry.value.map(
-                            (item) =>
-                                TransactionListTile(
-                              item: item,
-                            ),
-                          ),
-
-                          const SizedBox(
-                            height: 8,
-                          ),
-                        ];
-                      },
                     ),
-
-                    // =========================
-                    // Load More
-                    // =========================
-                    if (paginationState.hasMore)
+                  )
+                // =========================
+                // Transactions
+                // =========================
+                else ...[
+                  ...grouped.entries.expand((entry) {
+                    return [
                       Padding(
-                        padding:
-                            const EdgeInsets.only(
-                          top: 12,
-                          bottom: 20,
-                        ),
-                        child: Center(
-                          child:
-                              paginationState
-                                      .isLoadingMore
-                                  ? const Padding(
-                                      padding:
-                                          EdgeInsets.all(
-                                        12,
-                                      ),
-                                      child:
-                                          CircularProgressIndicator(),
-                                    )
-                                  : OutlinedButton.icon(
-                                      onPressed: () {
-                                        ref
-                                            .read(
-                                              paginatedTransactionsProvider
-                                                  .notifier,
-                                            )
-                                            .loadMore();
-                                      },
-                                      icon: const Icon(
-                                        Icons
-                                            .expand_more_rounded,
-                                      ),
-                                      label: const Text(
-                                        'تحميل المزيد',
-                                      ),
-                                    ),
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Text(
+                          entry.key,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: colors.onSurfaceVariant,
+                              ),
                         ),
                       ),
-                  ],
+
+                      ...entry.value.map((item) {
+                        if (item.type == ActivityType.transfer) {
+                          return _TransferListTile(item: item);
+                        }
+
+                        return TransactionListTile(item: item.transaction!);
+                      }),
+
+                      const SizedBox(height: 8),
+                    ];
+                  }),
+                ],
+              ],
+            );
+          },
+        ),
+
+        bottomNavigationBar: const AppBottomNavigation(),
+      ),
+    );
+  }
+}
+
+class _TransferListTile extends StatelessWidget {
+  const _TransferListTile({
+    required this.item,
+  });
+
+  final ActivityItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    final transfer = item.transfer!;
+    final fromAccount = transfer.fromAccount;
+    final toAccount = transfer.toAccount;
+
+    final note = transfer.transfer.note;
+
+    final subtitle = note != null && note.trim().isNotEmpty
+        ? '$note • ${fromAccount.name}'
+        : fromAccount.name;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerHighest.withValues(
+            alpha: 0.3,
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          textDirection: TextDirection.rtl,
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: colors.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.swap_horiz_rounded,
+                color: colors.primary,
+                size: 24,
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${fromAccount.name} → ${toAccount.name}',
+                    textDirection: TextDirection.rtl,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+
+                  const SizedBox(height: 3),
+
+                  Text(
+                    subtitle,
+                    textDirection: TextDirection.rtl,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
                 ],
               ),
+            ),
 
-        bottomNavigationBar:
-            const AppBottomNavigation(),
+            const SizedBox(width: 8),
+
+            Text(
+              '${transfer.transfer.amount.toStringAsFixed(0)} ج.م',
+              style: TextStyle(
+                color: colors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

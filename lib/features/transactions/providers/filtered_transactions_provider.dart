@@ -1,37 +1,54 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/activity_item.dart';
 import '../models/transaction_filter.dart';
 import '../models/transaction_period_filter.dart';
-import '../models/transaction_with_details.dart';
-import 'all_transactions_provider.dart';
+import 'activity_provider.dart';
 import 'transaction_filter_provider.dart';
 import 'transaction_period_filter_provider.dart';
 
-final filteredTransactionsProvider =
-    Provider<AsyncValue<List<TransactionWithDetails>>>((ref) {
-  final transactionsAsync = ref.watch(allTransactionsWithDetailsProvider);
+final filteredActivitiesProvider =
+    Provider<AsyncValue<List<ActivityItem>>>((ref) {
+  final activitiesAsync = ref.watch(activityProvider);
 
   final typeFilter = ref.watch(transactionFilterProvider);
   final periodFilter = ref.watch(transactionPeriodFilterProvider);
   final customRange = ref.watch(customTransactionDateRangeProvider);
 
-  return transactionsAsync.whenData((items) {
+  return activitiesAsync.whenData((items) {
     var result = items;
 
     // =========================
-    // Filter by transaction type
+    // Filter by type
     // =========================
-    final type = typeFilter.dbType;
 
-    if (type != null) {
-      result = result
-          .where((item) => item.transaction.type == type)
-          .toList();
+    switch (typeFilter) {
+      case TransactionFilter.all:
+        break;
+
+      case TransactionFilter.expense:
+        result = result.where((item) {
+          return item.transaction?.transaction.type == 'expense';
+        }).toList();
+        break;
+
+      case TransactionFilter.income:
+        result = result.where((item) {
+          return item.transaction?.transaction.type == 'income';
+        }).toList();
+        break;
+
+      case TransactionFilter.transfer:
+        result = result.where((item) {
+          return item.type == ActivityType.transfer;
+        }).toList();
+        break;
     }
 
     // =========================
     // Filter by date period
     // =========================
+
     final now = DateTime.now();
 
     DateTime start;
@@ -39,26 +56,48 @@ final filteredTransactionsProvider =
 
     switch (periodFilter) {
       case TransactionPeriodFilter.today:
-        start = DateTime(now.year, now.month, now.day);
-        end = start.add(const Duration(days: 1));
+        start = DateTime(
+          now.year,
+          now.month,
+          now.day,
+        );
+
+        end = start.add(
+          const Duration(days: 1),
+        );
         break;
 
       case TransactionPeriodFilter.thisWeek:
-        final today = DateTime(now.year, now.month, now.day);
+        final today = DateTime(
+          now.year,
+          now.month,
+          now.day,
+        );
 
-        // Monday = 1
-        final daysFromMonday = today.weekday - DateTime.monday;
+        final daysFromMonday =
+            today.weekday - DateTime.monday;
 
         start = today.subtract(
           Duration(days: daysFromMonday),
         );
 
-        end = start.add(const Duration(days: 7));
+        end = start.add(
+          const Duration(days: 7),
+        );
         break;
 
       case TransactionPeriodFilter.thisMonth:
-        start = DateTime(now.year, now.month, 1);
-        end = DateTime(now.year, now.month + 1, 1);
+        start = DateTime(
+          now.year,
+          now.month,
+          1,
+        );
+
+        end = DateTime(
+          now.year,
+          now.month + 1,
+          1,
+        );
         break;
 
       case TransactionPeriodFilter.custom:
@@ -76,15 +115,24 @@ final filteredTransactionsProvider =
           customRange.end.year,
           customRange.end.month,
           customRange.end.day,
-        ).add(const Duration(days: 1));
+        ).add(
+          const Duration(days: 1),
+        );
         break;
     }
 
     result = result.where((item) {
-      final date = item.transaction.transactionDate;
+      final date = item.date;
 
-      return !date.isBefore(start) && date.isBefore(end);
+      return !date.isBefore(start) &&
+          date.isBefore(end);
     }).toList();
+
+    // activityProvider already sorts by date,
+    // but we keep the ordering guaranteed here.
+    result.sort(
+      (a, b) => b.date.compareTo(a.date),
+    );
 
     return result;
   });
