@@ -74,9 +74,7 @@ class TransactionsPage extends ConsumerWidget {
 
         body: activitiesAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) => Center(
-            child: Text('حدث خطأ: $error'),
-          ),
+          error: (error, stackTrace) => Center(child: Text('حدث خطأ: $error')),
           data: (activities) {
             final grouped = _groupByDate(activities);
 
@@ -165,6 +163,13 @@ class TransactionsPage extends ConsumerWidget {
           },
         ),
 
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            context.push('/add-transaction');
+          },
+          child: const Icon(Icons.add),
+        ),
+
         bottomNavigationBar: const AppBottomNavigation(),
       ),
     );
@@ -172,9 +177,7 @@ class TransactionsPage extends ConsumerWidget {
 }
 
 class _TransferListTile extends StatelessWidget {
-  const _TransferListTile({
-    required this.item,
-  });
+  const _TransferListTile({required this.item});
 
   final ActivityItem item;
 
@@ -194,74 +197,78 @@ class _TransferListTile extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: colors.surfaceContainerHighest.withValues(
-            alpha: 0.3,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          context.push('/transfers/details', extra: transfer);
+        },
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: colors.surfaceContainerHighest.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(16),
           ),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          textDirection: TextDirection.rtl,
-          children: [
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                color: colors.primaryContainer,
-                shape: BoxShape.circle,
+          child: Row(
+            textDirection: TextDirection.rtl,
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: colors.primaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.swap_horiz_rounded,
+                  color: colors.primary,
+                  size: 24,
+                ),
               ),
-              child: Icon(
-                Icons.swap_horiz_rounded,
-                color: colors.primary,
-                size: 24,
-              ),
-            ),
 
-            const SizedBox(width: 12),
+              const SizedBox(width: 12),
 
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${fromAccount.name} → ${toAccount.name}',
-                    textDirection: TextDirection.rtl,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${fromAccount.name} → ${toAccount.name}',
+                      textDirection: TextDirection.rtl,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 3),
+                    const SizedBox(height: 3),
 
-                  Text(
-                    subtitle,
-                    textDirection: TextDirection.rtl,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colors.onSurfaceVariant,
+                    Text(
+                      subtitle,
+                      textDirection: TextDirection.rtl,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: colors.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
-            const SizedBox(width: 8),
+              const SizedBox(width: 8),
 
-            Text(
-              '${transfer.transfer.amount.toStringAsFixed(0)} ج.م',
-              style: TextStyle(
-                color: colors.primary,
-                fontWeight: FontWeight.bold,
+              Text(
+                '${transfer.transfer.amount.toStringAsFixed(0)} ج.م',
+                style: TextStyle(
+                  color: colors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
