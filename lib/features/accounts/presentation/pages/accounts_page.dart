@@ -182,12 +182,18 @@ class AccountsPage extends ConsumerWidget {
                     ...accounts.map((account) {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: _AccountCard(
-                          name: account.name,
-                          type: account.type,
-                          balance: account.currentBalance,
-                          color: Color(account.color),
-                          icon: account.icon,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap: () {
+                            context.push('/accounts/details', extra: account);
+                          },
+                          child: _AccountCard(
+                            name: account.name,
+                            type: account.type,
+                            balance: account.currentBalance,
+                            color: Color(account.color),
+                            icon: account.icon,
+                          ),
                         ),
                       );
                     }),
