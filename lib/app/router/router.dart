@@ -15,6 +15,7 @@ import '../../features/transfers/presentation/pages/transfer_details_page.dart';
 import '../../features/transfers/presentation/pages/edit_transfer_page.dart';
 import '../../core/database/app_database.dart';
 import '../../features/accounts/presentation/pages/account_details_page.dart';
+import '../../features/accounts/presentation/pages/edit_account_page.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: '/',
@@ -40,6 +41,14 @@ final GoRouter router = GoRouter(
         final account = state.extra as Account;
 
         return AccountDetailsPage(account: account);
+      },
+    ),
+    GoRoute(
+      path: '/accounts/edit',
+      builder: (context, state) {
+        final account = state.extra as Account;
+
+        return EditAccountPage(account: account);
       },
     ),
     GoRoute(
