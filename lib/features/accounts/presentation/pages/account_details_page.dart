@@ -4,13 +4,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../providers/account_activity_provider.dart';
+import '../../providers/account_details_provider.dart';
+import '../../providers/account_repository_provider.dart';
+import '../../../dashboard/providers/dashboard_provider.dart';
+import '../../../transactions/providers/transaction_accounts_provider.dart';
 import '../../../transactions/models/activity_item.dart';
 
 class AccountDetailsPage extends ConsumerWidget {
-  const AccountDetailsPage({
-    super.key,
-    required this.account,
-  });
+  const AccountDetailsPage({super.key, required this.account});
 
   final Account account;
 
@@ -68,6 +69,62 @@ class AccountDetailsPage extends ConsumerWidget {
     }
   }
 
+  Future<void> _deleteAccount(
+    BuildContext context,
+    WidgetRef ref,
+    Account account,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            title: const Text('حذف الحساب؟'),
+            content: const Text(
+              'سيتم حذف الحساب وجميع المعاملات والتحويلات المرتبطة به نهائيًا.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: const Text('إلغاء'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('حذف الحساب'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await ref.read(accountRepositoryProvider).deleteAccount(account.id);
+
+      ref.invalidate(accountsProvider);
+      ref.invalidate(accountDetailsProvider(account.id));
+      ref.invalidate(accountActivityProvider(account.id));
+      ref.invalidate(dashboardProvider);
+      ref.invalidate(transactionAccountsProvider);
+
+      if (!context.mounted) return;
+
+      context.go('/accounts');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تم حذف الحساب بنجاح')),
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('حدث خطأ أثناء حذف الحساب: $error')),
+      );
+    }
+  }
+
   // ============================================================
   // Build
   // ============================================================
@@ -75,13 +132,14 @@ class AccountDetailsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
+    final accountAsync = ref.watch(accountDetailsProvider(account.id));
+    final currentAccount = accountAsync.valueOrNull ?? account;
 
-    final accountColor = Color(account.color);
+    final accountColor = Color(currentAccount.color);
 
-    final isNegative = account.currentBalance < 0;
+    final isNegative = currentAccount.currentBalance < 0;
 
-    final activityAsync =
-        ref.watch(accountActivityProvider(account.id));
+    final activityAsync = ref.watch(accountActivityProvider(currentAccount.id));
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -91,7 +149,6 @@ class AccountDetailsPage extends ConsumerWidget {
         // ========================================================
         // App Bar
         // ========================================================
-
         appBar: AppBar(
           title: const Text('تفاصيل الحساب'),
           centerTitle: true,
@@ -113,8 +170,7 @@ class AccountDetailsPage extends ConsumerWidget {
               tooltip: 'تعديل الحساب',
               icon: const Icon(Icons.edit_outlined),
               onPressed: () {
-                // هنربطه بـ EditAccountPage
-                // في الخطوة القادمة.
+                context.push('/accounts/edit', extra: currentAccount);
               },
             ),
           ],
@@ -123,40 +179,27 @@ class AccountDetailsPage extends ConsumerWidget {
         // ========================================================
         // Body
         // ========================================================
-
         body: RefreshIndicator(
           onRefresh: () async {
-            ref.invalidate(
-              accountActivityProvider(account.id),
-            );
+            ref.invalidate(accountActivityProvider(account.id));
 
-            await ref.read(
-              accountActivityProvider(account.id).future,
-            );
+            await ref.read(accountActivityProvider(account.id).future);
           },
 
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
 
-            padding: const EdgeInsets.fromLTRB(
-              20,
-              8,
-              20,
-              32,
-            ),
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
 
             children: [
               // ==================================================
               // Account Header
               // ==================================================
-
               _AccountHeader(
-                account: account,
+                account: currentAccount,
                 accountColor: accountColor,
-                accountTypeName:
-                    _getAccountTypeName(account.type),
-                accountIcon:
-                    _getAccountIcon(account.type),
+                accountTypeName: _getAccountTypeName(currentAccount.type),
+                accountIcon: _getAccountIcon(currentAccount.type),
               ),
 
               const SizedBox(height: 20),
@@ -164,10 +207,7 @@ class AccountDetailsPage extends ConsumerWidget {
               // ==================================================
               // Account Information
               // ==================================================
-
-              _SectionTitle(
-                title: 'معلومات الحساب',
-              ),
+              _SectionTitle(title: 'معلومات الحساب'),
 
               const SizedBox(height: 10),
 
@@ -176,9 +216,7 @@ class AccountDetailsPage extends ConsumerWidget {
                   color: colors.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: colors.outlineVariant.withValues(
-                      alpha: 0.55,
-                    ),
+                    color: colors.outlineVariant.withValues(alpha: 0.55),
                   ),
                 ),
                 clipBehavior: Clip.antiAlias,
@@ -189,7 +227,7 @@ class AccountDetailsPage extends ConsumerWidget {
                       icon: Icons.account_balance_wallet_outlined,
                       title: 'الرصيد الافتتاحي',
                       value:
-                          '${account.openingBalance.toStringAsFixed(2)} جنيه',
+                          '${currentAccount.openingBalance.toStringAsFixed(2)} جنيه',
                     ),
 
                     _Divider(),
@@ -197,8 +235,7 @@ class AccountDetailsPage extends ConsumerWidget {
                     _DetailRow(
                       icon: Icons.category_outlined,
                       title: 'نوع الحساب',
-                      value:
-                          _getAccountTypeName(account.type),
+                      value: _getAccountTypeName(currentAccount.type),
                     ),
 
                     _Divider(),
@@ -207,10 +244,8 @@ class AccountDetailsPage extends ConsumerWidget {
                       icon: Icons.account_balance_wallet_rounded,
                       title: 'الرصيد الحالي',
                       value:
-                          '${account.currentBalance.toStringAsFixed(2)} جنيه',
-                      valueColor: isNegative
-                          ? colors.error
-                          : colors.primary,
+                          '${currentAccount.currentBalance.toStringAsFixed(2)} جنيه',
+                      valueColor: isNegative ? colors.error : colors.primary,
                     ),
                   ],
                 ),
@@ -221,14 +256,9 @@ class AccountDetailsPage extends ConsumerWidget {
               // ==================================================
               // Activities Header
               // ==================================================
-
               Row(
                 children: [
-                  Expanded(
-                    child: _SectionTitle(
-                      title: 'آخر العمليات',
-                    ),
-                  ),
+                  Expanded(child: _SectionTitle(title: 'آخر العمليات')),
 
                   TextButton(
                     onPressed: () {
@@ -244,7 +274,6 @@ class AccountDetailsPage extends ConsumerWidget {
               // ==================================================
               // Activities
               // ==================================================
-
               activityAsync.when(
                 loading: () {
                   return _ActivityLoading();
@@ -253,9 +282,7 @@ class AccountDetailsPage extends ConsumerWidget {
                 error: (error, stackTrace) {
                   return _ActivityError(
                     onRetry: () {
-                      ref.invalidate(
-                        accountActivityProvider(account.id),
-                      );
+                      ref.invalidate(accountActivityProvider(account.id));
                     },
                   );
                 },
@@ -266,17 +293,14 @@ class AccountDetailsPage extends ConsumerWidget {
                   }
 
                   // نعرض آخر 10 عمليات فقط
-                  final visibleActivities =
-                      activities.take(10).toList();
+                  final visibleActivities = activities.take(10).toList();
 
                   return Container(
                     decoration: BoxDecoration(
                       color: colors.surfaceContainerLow,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: colors.outlineVariant.withValues(
-                          alpha: 0.55,
-                        ),
+                        color: colors.outlineVariant.withValues(alpha: 0.55),
                       ),
                     ),
                     clipBehavior: Clip.antiAlias,
@@ -289,14 +313,11 @@ class AccountDetailsPage extends ConsumerWidget {
                           index++
                         ) ...[
                           _AccountActivityTile(
-                            activity:
-                                visibleActivities[index],
+                            activity: visibleActivities[index],
                             accountId: account.id,
                           ),
 
-                          if (index !=
-                              visibleActivities.length - 1)
-                            _Divider(),
+                          if (index != visibleActivities.length - 1) _Divider(),
                         ],
                       ],
                     ),
@@ -309,20 +330,14 @@ class AccountDetailsPage extends ConsumerWidget {
               // ==================================================
               // Edit Account
               // ==================================================
-
               SizedBox(
                 height: 52,
                 child: OutlinedButton.icon(
                   onPressed: () {
-                    // هنربطه بـ EditAccountPage
-                    // في الخطوة القادمة.
+                    context.push('/accounts/edit', extra: currentAccount);
                   },
-                  icon: const Icon(
-                    Icons.edit_outlined,
-                  ),
-                  label: const Text(
-                    'تعديل الحساب',
-                  ),
+                  icon: const Icon(Icons.edit_outlined),
+                  label: const Text('تعديل الحساب'),
                 ),
               ),
 
@@ -331,23 +346,14 @@ class AccountDetailsPage extends ConsumerWidget {
               // ==================================================
               // Delete Account
               // ==================================================
-
               SizedBox(
                 height: 52,
                 child: OutlinedButton.icon(
-                  onPressed: () {
-                    // هنضيف Delete Account
-                    // بعد تجهيز Repository.
-                  },
-                  icon: Icon(
-                    Icons.delete_outline_rounded,
-                    color: colors.error,
-                  ),
+                  onPressed: () => _deleteAccount(context, ref, currentAccount),
+                  icon: Icon(Icons.delete_outline_rounded, color: colors.error),
                   label: Text(
                     'حذف الحساب',
-                    style: TextStyle(
-                      color: colors.error,
-                    ),
+                    style: TextStyle(color: colors.error),
                   ),
                 ),
               ),
@@ -380,8 +386,7 @@ class _AccountHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
-    final isNegative =
-        account.currentBalance < 0;
+    final isNegative = account.currentBalance < 0;
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -391,9 +396,7 @@ class _AccountHeader extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
 
         border: Border.all(
-          color: colors.outlineVariant.withValues(
-            alpha: 0.55,
-          ),
+          color: colors.outlineVariant.withValues(alpha: 0.55),
         ),
       ),
 
@@ -405,17 +408,11 @@ class _AccountHeader extends StatelessWidget {
             height: 76,
 
             decoration: BoxDecoration(
-              color: accountColor.withValues(
-                alpha: 0.14,
-              ),
+              color: accountColor.withValues(alpha: 0.14),
               shape: BoxShape.circle,
             ),
 
-            child: Icon(
-              accountIcon,
-              size: 36,
-              color: accountColor,
-            ),
+            child: Icon(accountIcon, size: 36, color: accountColor),
           ),
 
           const SizedBox(height: 16),
@@ -425,12 +422,9 @@ class _AccountHeader extends StatelessWidget {
             account.name,
             textAlign: TextAlign.center,
 
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall
-                ?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
 
           const SizedBox(height: 4),
@@ -438,12 +432,9 @@ class _AccountHeader extends StatelessWidget {
           // Type
           Text(
             accountTypeName,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: colors.onSurfaceVariant),
           ),
 
           const SizedBox(height: 22),
@@ -451,12 +442,9 @@ class _AccountHeader extends StatelessWidget {
           // Current balance label
           Text(
             'الرصيد الحالي',
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
           ),
 
           const SizedBox(height: 6),
@@ -465,15 +453,10 @@ class _AccountHeader extends StatelessWidget {
           Text(
             '${account.currentBalance.toStringAsFixed(2)} جنيه',
 
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium
-                ?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isNegative
-                      ? colors.error
-                      : colors.primary,
-                ),
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: isNegative ? colors.error : colors.primary,
+            ),
           ),
         ],
       ),
@@ -486,9 +469,7 @@ class _AccountHeader extends StatelessWidget {
 // =================================================================
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({
-    required this.title,
-  });
+  const _SectionTitle({required this.title});
 
   final String title;
 
@@ -496,12 +477,9 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: Theme.of(context)
-          .textTheme
-          .titleLarge
-          ?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+      style: Theme.of(
+        context,
+      ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
     );
   }
 }
@@ -511,21 +489,16 @@ class _SectionTitle extends StatelessWidget {
 // =================================================================
 
 class _AccountActivityTile extends StatelessWidget {
-  const _AccountActivityTile({
-    required this.activity,
-    required this.accountId,
-  });
+  const _AccountActivityTile({required this.activity, required this.accountId});
 
   final ActivityItem activity;
   final int accountId;
 
   @override
   Widget build(BuildContext context) {
-    final colors =
-        Theme.of(context).colorScheme;
+    final colors = Theme.of(context).colorScheme;
 
-    final isTransfer =
-        activity.type == ActivityType.transfer;
+    final isTransfer = activity.type == ActivityType.transfer;
 
     String title;
     String subtitle;
@@ -543,86 +516,68 @@ class _AccountActivityTile extends StatelessWidget {
     if (isTransfer) {
       final transfer = activity.transfer!;
 
-      final isOutgoing =
-          transfer.fromAccount.id == accountId;
+      final isOutgoing = transfer.fromAccount.id == accountId;
 
       if (isOutgoing) {
         title = 'تحويل صادر';
 
-        subtitle =
-            'إلى ${transfer.toAccount.name}';
+        subtitle = 'إلى ${transfer.toAccount.name}';
 
-        amountText =
-            '-${transfer.transfer.amount.toStringAsFixed(2)} جنيه';
+        amountText = '-${transfer.transfer.amount.toStringAsFixed(2)} جنيه';
 
         amountColor = colors.error;
 
         icon = Icons.arrow_upward_rounded;
 
-        iconBackground =
-            colors.error.withValues(alpha: 0.12);
+        iconBackground = colors.error.withValues(alpha: 0.12);
       } else {
         title = 'تحويل وارد';
 
-        subtitle =
-            'من ${transfer.fromAccount.name}';
+        subtitle = 'من ${transfer.fromAccount.name}';
 
-        amountText =
-            '+${transfer.transfer.amount.toStringAsFixed(2)} جنيه';
+        amountText = '+${transfer.transfer.amount.toStringAsFixed(2)} جنيه';
 
         amountColor = colors.primary;
 
         icon = Icons.arrow_downward_rounded;
 
-        iconBackground =
-            colors.primary.withValues(alpha: 0.12);
+        iconBackground = colors.primary.withValues(alpha: 0.12);
       }
     }
-
     // ============================================================
     // Normal Transaction
     // ============================================================
-
     else {
-      final transaction =
-          activity.transaction!;
+      final transaction = activity.transaction!;
 
-      final isExpense =
-          transaction.transaction.type ==
-              'expense';
+      final isExpense = transaction.transaction.type == 'expense';
 
       if (isExpense) {
         title = 'مصروف';
 
-        subtitle =
-            transaction.category.name;
+        subtitle = transaction.category.name;
 
         amountText =
             '-${transaction.transaction.amount.toStringAsFixed(2)} جنيه';
 
         amountColor = colors.error;
 
-        icon =
-            Icons.arrow_downward_rounded;
+        icon = Icons.arrow_downward_rounded;
 
-        iconBackground =
-            colors.error.withValues(alpha: 0.12);
+        iconBackground = colors.error.withValues(alpha: 0.12);
       } else {
         title = 'دخل';
 
-        subtitle =
-            transaction.category.name;
+        subtitle = transaction.category.name;
 
         amountText =
             '+${transaction.transaction.amount.toStringAsFixed(2)} جنيه';
 
         amountColor = colors.primary;
 
-        icon =
-            Icons.arrow_upward_rounded;
+        icon = Icons.arrow_upward_rounded;
 
-        iconBackground =
-            colors.primary.withValues(alpha: 0.12);
+        iconBackground = colors.primary.withValues(alpha: 0.12);
       }
     }
 
@@ -633,10 +588,7 @@ class _AccountActivityTile extends StatelessWidget {
         // ========================================================
 
         if (!isTransfer) {
-          context.push(
-            '/transactions/details',
-            extra: activity.transaction,
-          );
+          context.push('/transactions/details', extra: activity.transaction);
 
           return;
         }
@@ -645,17 +597,11 @@ class _AccountActivityTile extends StatelessWidget {
         // Transfer Details
         // ========================================================
 
-        context.push(
-          '/transfers/details',
-          extra: activity.transfer,
-        );
+        context.push('/transfers/details', extra: activity.transfer);
       },
 
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
 
         child: Row(
           textDirection: TextDirection.rtl,
@@ -664,7 +610,6 @@ class _AccountActivityTile extends StatelessWidget {
             // ======================================================
             // Icon
             // ======================================================
-
             Container(
               width: 46,
               height: 46,
@@ -674,11 +619,7 @@ class _AccountActivityTile extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
 
-              child: Icon(
-                icon,
-                size: 22,
-                color: amountColor,
-              ),
+              child: Icon(icon, size: 22, color: amountColor),
             ),
 
             const SizedBox(width: 12),
@@ -686,27 +627,20 @@ class _AccountActivityTile extends StatelessWidget {
             // ======================================================
             // Details
             // ======================================================
-
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
                   Text(
                     title,
 
                     maxLines: 1,
-                    overflow:
-                        TextOverflow.ellipsis,
+                    overflow: TextOverflow.ellipsis,
 
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(
-                          fontWeight:
-                              FontWeight.w700,
-                        ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
 
                   const SizedBox(height: 4),
@@ -715,16 +649,11 @@ class _AccountActivityTile extends StatelessWidget {
                     subtitle,
 
                     maxLines: 1,
-                    overflow:
-                        TextOverflow.ellipsis,
+                    overflow: TextOverflow.ellipsis,
 
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(
-                          color:
-                              colors.onSurfaceVariant,
-                        ),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -735,20 +664,15 @@ class _AccountActivityTile extends StatelessWidget {
             // ======================================================
             // Amount
             // ======================================================
-
             Text(
               amountText,
 
               textAlign: TextAlign.left,
 
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(
-                    fontWeight:
-                        FontWeight.bold,
-                    color: amountColor,
-                  ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: amountColor,
+              ),
             ),
 
             const SizedBox(width: 4),
@@ -772,23 +696,17 @@ class _AccountActivityTile extends StatelessWidget {
 class _EmptyActivities extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final colors =
-        Theme.of(context).colorScheme;
+    final colors = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 24,
-        vertical: 32,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
 
       decoration: BoxDecoration(
         color: colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(20),
 
         border: Border.all(
-          color: colors.outlineVariant.withValues(
-            alpha: 0.55,
-          ),
+          color: colors.outlineVariant.withValues(alpha: 0.55),
         ),
       ),
 
@@ -799,16 +717,14 @@ class _EmptyActivities extends StatelessWidget {
             height: 64,
 
             decoration: BoxDecoration(
-              color:
-                  colors.primaryContainer,
+              color: colors.primaryContainer,
               shape: BoxShape.circle,
             ),
 
             child: Icon(
               Icons.receipt_long_outlined,
               size: 30,
-              color:
-                  colors.onPrimaryContainer,
+              color: colors.onPrimaryContainer,
             ),
           ),
 
@@ -819,12 +735,9 @@ class _EmptyActivities extends StatelessWidget {
 
             textAlign: TextAlign.center,
 
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
 
           const SizedBox(height: 6),
@@ -833,13 +746,9 @@ class _EmptyActivities extends StatelessWidget {
             'ستظهر هنا المصروفات والدخل والتحويلات الخاصة بهذا الحساب.',
             textAlign: TextAlign.center,
 
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(
-                  color:
-                      colors.onSurfaceVariant,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
           ),
         ],
       ),
@@ -854,8 +763,7 @@ class _EmptyActivities extends StatelessWidget {
 class _ActivityLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final colors =
-        Theme.of(context).colorScheme;
+    final colors = Theme.of(context).colorScheme;
 
     return Container(
       height: 160,
@@ -865,9 +773,7 @@ class _ActivityLoading extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
 
-      child: const Center(
-        child: CircularProgressIndicator(),
-      ),
+      child: const Center(child: CircularProgressIndicator()),
     );
   }
 }
@@ -877,16 +783,13 @@ class _ActivityLoading extends StatelessWidget {
 // =================================================================
 
 class _ActivityError extends StatelessWidget {
-  const _ActivityError({
-    required this.onRetry,
-  });
+  const _ActivityError({required this.onRetry});
 
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    final colors =
-        Theme.of(context).colorScheme;
+    final colors = Theme.of(context).colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -895,19 +798,12 @@ class _ActivityError extends StatelessWidget {
         color: colors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(20),
 
-        border: Border.all(
-          color:
-              colors.error.withValues(alpha: 0.25),
-        ),
+        border: Border.all(color: colors.error.withValues(alpha: 0.25)),
       ),
 
       child: Column(
         children: [
-          Icon(
-            Icons.error_outline_rounded,
-            size: 40,
-            color: colors.error,
-          ),
+          Icon(Icons.error_outline_rounded, size: 40, color: colors.error),
 
           const SizedBox(height: 12),
 
@@ -915,21 +811,15 @@ class _ActivityError extends StatelessWidget {
             'حدث خطأ أثناء تحميل العمليات',
             textAlign: TextAlign.center,
 
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(
-                  color: colors.error,
-                  fontWeight: FontWeight.w600,
-                ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: colors.error,
+              fontWeight: FontWeight.w600,
+            ),
           ),
 
           const SizedBox(height: 12),
 
-          TextButton(
-            onPressed: onRetry,
-            child: const Text('إعادة المحاولة'),
-          ),
+          TextButton(onPressed: onRetry, child: const Text('إعادة المحاولة')),
         ],
       ),
     );
@@ -955,14 +845,10 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors =
-        Theme.of(context).colorScheme;
+    final colors = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 16,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
 
       child: Row(
         textDirection: TextDirection.rtl,
@@ -974,17 +860,11 @@ class _DetailRow extends StatelessWidget {
             height: 38,
 
             decoration: BoxDecoration(
-              color:
-                  colors.primaryContainer,
+              color: colors.primaryContainer,
               shape: BoxShape.circle,
             ),
 
-            child: Icon(
-              icon,
-              size: 19,
-              color:
-                  colors.onPrimaryContainer,
-            ),
+            child: Icon(icon, size: 19, color: colors.onPrimaryContainer),
           ),
 
           const SizedBox(width: 12),
@@ -994,13 +874,9 @@ class _DetailRow extends StatelessWidget {
             child: Text(
               title,
 
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(
-                    color:
-                        colors.onSurfaceVariant,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: colors.onSurfaceVariant),
             ),
           ),
 
@@ -1010,15 +886,10 @@ class _DetailRow extends StatelessWidget {
           Text(
             value,
 
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color:
-                      valueColor ??
-                          colors.onSurface,
-                ),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: valueColor ?? colors.onSurface,
+            ),
           ),
         ],
       ),
@@ -1033,16 +904,13 @@ class _DetailRow extends StatelessWidget {
 class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final colors =
-        Theme.of(context).colorScheme;
+    final colors = Theme.of(context).colorScheme;
 
     return Divider(
       height: 1,
       indent: 16,
       endIndent: 16,
-      color: colors.outlineVariant.withValues(
-        alpha: 0.5,
-      ),
+      color: colors.outlineVariant.withValues(alpha: 0.5),
     );
   }
 }
