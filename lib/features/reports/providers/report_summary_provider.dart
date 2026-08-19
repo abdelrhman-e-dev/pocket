@@ -4,13 +4,28 @@ import '../repositories/reports_repository.dart';
 import 'reports_repository_provider.dart';
 
 final reportSummaryProvider =
-    FutureProvider.family<ReportSummary, DateTimeRange>(
-  (ref, range) async {
-    final repository = ref.watch(reportsRepositoryProvider);
+    FutureProvider.family<ReportSummary, DateTimeRange>((ref, range) async {
+      final repository = ref.watch(reportsRepositoryProvider);
 
-    return repository.getSummary(
-      start: range.start,
-      end: range.end,
-    );
-  },
-);
+      return repository.getSummary(start: range.start, end: range.end);
+    });
+
+final reportCategoriesProvider =
+    FutureProvider.family<List<ExpenseByCategory>, DateTimeRange>((
+      ref,
+      range,
+    ) async {
+      final repository = ref.watch(reportsRepositoryProvider);
+
+      return repository.getExpensesByCategory(
+        start: range.start,
+        end: range.end,
+      );
+    });
+
+final dailyReportsProvider =
+    FutureProvider.family<List<DailyReport>, DateTimeRange>((ref, range) async {
+      final repository = ref.watch(reportsRepositoryProvider);
+
+      return repository.getDailyExpenses(start: range.start, end: range.end);
+    });
