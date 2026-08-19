@@ -16,7 +16,7 @@ import '../../features/transfers/presentation/pages/edit_transfer_page.dart';
 import '../../core/database/app_database.dart';
 import '../../features/accounts/presentation/pages/account_details_page.dart';
 import '../../features/accounts/presentation/pages/edit_account_page.dart';
-
+import '../../features/reports/presentation/pages/reports_page.dart';
 final GoRouter router = GoRouter(
   initialLocation: '/',
 
@@ -109,5 +109,11 @@ final GoRouter router = GoRouter(
         return TransactionDetailsPage(transaction: transaction);
       },
     ),
+    GoRoute(
+  path: '/reports',
+  builder: (context, state) {
+    return const ReportsPage();
+  },
+),
   ],
 );
