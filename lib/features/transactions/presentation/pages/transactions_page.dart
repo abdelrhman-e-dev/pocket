@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../dashboard/providers/dashboard_summary_provider.dart';
 import '../../models/activity_item.dart';
+import '../../providers/activity_provider.dart';
 import '../../providers/filtered_transactions_provider.dart';
 import '../widgets/transaction_filter_chips.dart';
 import '../widgets/transaction_list_tile.dart';
@@ -16,20 +17,16 @@ class TransactionsPage extends ConsumerWidget {
 
   Map<String, List<ActivityItem>> _groupByDate(List<ActivityItem> items) {
     final now = DateTime.now();
-
     final today = DateTime(now.year, now.month, now.day);
-
     final yesterday = today.subtract(const Duration(days: 1));
 
     final grouped = <String, List<ActivityItem>>{};
 
     for (final item in items) {
       final date = item.date;
-
       final day = DateTime(date.year, date.month, date.day);
 
       final String label;
-
       if (day == today) {
         label = 'اليوم';
       } else if (day == yesterday) {
@@ -44,130 +41,153 @@ class TransactionsPage extends ConsumerWidget {
     return grouped;
   }
 
+  double _dayTotal(List<ActivityItem> items) {
+    double total = 0;
+    for (final item in items) {
+      if (item.type == ActivityType.transaction) {
+        final t = item.transaction!.transaction;
+        total += t.type == 'expense' ? -t.amount : t.amount;
+      }
+    }
+    return total;
+  }
+
+  Future<void> _onRefresh(WidgetRef ref) async {
+    ref.invalidate(activityProvider);
+    ref.invalidate(dashboardSummaryProvider);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activitiesAsync = ref.watch(filteredActivitiesProvider);
     final summaryAsync = ref.watch(dashboardSummaryProvider);
-
     final colors = Theme.of(context).colorScheme;
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: colors.surface,
-
-        appBar: AppBar(
-          title: const Text('العمليات'),
-          centerTitle: true,
-
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              if (context.canPop()) {
-                context.pop();
-              } else {
-                context.go('/dashboard');
-              }
-            },
-          ),
-        ),
-
-        body: activitiesAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) => Center(child: Text('حدث خطأ: $error')),
-          data: (activities) {
-            final grouped = _groupByDate(activities);
-
-            return ListView(
-              padding: const EdgeInsets.all(20),
-              children: [
+        body: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: () => _onRefresh(ref),
+            child: CustomScrollView(
+              slivers: [
                 // =========================
-                // Summary
+                // App Bar
                 // =========================
-                summaryAsync.when(
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-
-                  error: (_, __) => const SizedBox.shrink(),
-
-                  data: (summary) => TransactionsSummaryCard(
-                    income: summary.income,
-                    expenses: summary.expenses,
+                SliverAppBar(
+                  pinned: true,
+                  backgroundColor: colors.surface,
+                  surfaceTintColor: Colors.transparent,
+                  centerTitle: true,
+                  title: const Text('العمليات'),
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      if (context.canPop()) {
+                        context.pop();
+                      } else {
+                        context.go('/dashboard');
+                      }
+                    },
                   ),
                 ),
 
-                const SizedBox(height: 20),
-
                 // =========================
-                // Type Filter
+                // Summary
                 // =========================
-                const TransactionFilterChips(),
-
-                const SizedBox(height: 12),
-
-                // =========================
-                // Period Filter
-                // =========================
-                const Align(
-                  alignment: Alignment.centerRight,
-                  child: TransactionPeriodFilterDropdown(),
-                ),
-
-                const SizedBox(height: 20),
-
-                // =========================
-                // Empty State
-                // =========================
-                if (activities.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 60),
-                    child: Center(
-                      child: Text(
-                        'لا توجد عمليات حتى الآن',
-                        textAlign: TextAlign.center,
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                    child: summaryAsync.when(
+                      loading: () => const SizedBox(
+                        height: 100,
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                      error: (_, __) => const SizedBox.shrink(),
+                      data: (summary) => TransactionsSummaryCard(
+                        income: summary.income,
+                        expenses: summary.expenses,
                       ),
                     ),
-                  )
+                  ),
+                ),
+
                 // =========================
-                // Transactions
+                // Filters
                 // =========================
-                else ...[
-                  ...grouped.entries.expand((entry) {
-                    return [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Text(
-                          entry.key,
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: colors.onSurfaceVariant,
-                              ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: const [
+                        TransactionFilterChips(),
+                        SizedBox(height: 12),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TransactionPeriodFilterDropdown(),
                         ),
+                        SizedBox(height: 8),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // =========================
+                // Content
+                // =========================
+                activitiesAsync.when(
+                  loading: () => const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (error, stackTrace) => SliverFillRemaining(
+                    child: Center(child: Text('حدث خطأ: $error')),
+                  ),
+                  data: (activities) {
+                    if (activities.isEmpty) {
+                      return const SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: _EmptyTransactions(),
+                      );
+                    }
+
+                    final grouped = _groupByDate(activities);
+
+                    return SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate([
+                          for (final entry in grouped.entries) ...[
+                            _DateSectionHeader(
+                              label: entry.key,
+                              total: _dayTotal(entry.value),
+                            ),
+                            const SizedBox(height: 8),
+                            ...entry.value.map((item) {
+                              if (item.type == ActivityType.transfer) {
+                                return _TransferListTile(item: item);
+                              }
+                              return TransactionListTile(
+                                item: item.transaction!,
+                              );
+                            }),
+                            const SizedBox(height: 16),
+                          ],
+                        ]),
                       ),
-
-                      ...entry.value.map((item) {
-                        if (item.type == ActivityType.transfer) {
-                          return _TransferListTile(item: item);
-                        }
-
-                        return TransactionListTile(item: item.transaction!);
-                      }),
-
-                      const SizedBox(height: 8),
-                    ];
-                  }),
-                ],
+                    );
+                  },
+                ),
               ],
-            );
-          },
+            ),
+          ),
         ),
 
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            context.push('/add-transaction');
-          },
-          child: const Icon(Icons.add),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => context.push('/add-transaction'),
+          icon: const Icon(Icons.add),
+          label: const Text('عملية جديدة'),
         ),
 
         bottomNavigationBar: const AppBottomNavigation(),
@@ -176,6 +196,96 @@ class TransactionsPage extends ConsumerWidget {
   }
 }
 
+// ======================================================
+// Date section header with daily total
+// ======================================================
+class _DateSectionHeader extends StatelessWidget {
+  const _DateSectionHeader({required this.label, required this.total});
+
+  final String label;
+  final double total;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final isPositive = total >= 0;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: colors.onSurfaceVariant,
+          ),
+        ),
+        Text(
+          '${isPositive ? '+' : ''}${total.toStringAsFixed(0)} ج.م',
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: isPositive ? Colors.green : colors.error,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ======================================================
+// Empty state
+// ======================================================
+class _EmptyTransactions extends StatelessWidget {
+  const _EmptyTransactions();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                color: colors.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.receipt_long_outlined,
+                size: 42,
+                color: colors.primary,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'لا توجد عمليات حتى الآن',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'ابدأ بإضافة أول عملية لمتابعة مصروفاتك ودخلك',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ======================================================
+// Transfer tile (unchanged behavior, kept local)
+// ======================================================
 class _TransferListTile extends StatelessWidget {
   const _TransferListTile({required this.item});
 
@@ -188,7 +298,6 @@ class _TransferListTile extends StatelessWidget {
     final transfer = item.transfer!;
     final fromAccount = transfer.fromAccount;
     final toAccount = transfer.toAccount;
-
     final note = transfer.transfer.note;
 
     final subtitle = note != null && note.trim().isNotEmpty
@@ -199,9 +308,7 @@ class _TransferListTile extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () {
-          context.push('/transfers/details', extra: transfer);
-        },
+        onTap: () => context.push('/transfers/details', extra: transfer),
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
@@ -224,9 +331,7 @@ class _TransferListTile extends StatelessWidget {
                   size: 24,
                 ),
               ),
-
               const SizedBox(width: 12),
-
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,9 +346,7 @@ class _TransferListTile extends StatelessWidget {
                         fontSize: 15,
                       ),
                     ),
-
                     const SizedBox(height: 3),
-
                     Text(
                       subtitle,
                       textDirection: TextDirection.rtl,
@@ -257,9 +360,7 @@ class _TransferListTile extends StatelessWidget {
                   ],
                 ),
               ),
-
               const SizedBox(width: 8),
-
               Text(
                 '${transfer.transfer.amount.toStringAsFixed(0)} ج.م',
                 style: TextStyle(
