@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-
+import 'package:go_router/go_router.dart';
 class DashboardHeader extends StatelessWidget {
-  const DashboardHeader({
-    super.key,
-  });
+  const DashboardHeader({super.key});
 
   String _getGreeting(int hour) {
     if (hour >= 5 && hour < 12) {
@@ -70,21 +68,14 @@ class DashboardHeader extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(
-                      icon,
-                      size: 22,
-                      color: colors.primary,
-                    ),
+                    Icon(icon, size: 22, color: colors.primary),
                     const SizedBox(width: 6),
                     Text(
                       '$greeting، عبد الرحمن',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(
-                            color: colors.onSurface,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: colors.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -93,12 +84,9 @@ class DashboardHeader extends StatelessWidget {
 
                 Text(
                   _formatDate(now),
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -106,12 +94,9 @@ class DashboardHeader extends StatelessWidget {
 
           IconButton(
             onPressed: () {
-              // الإعدادات لاحقًا
+              context.push('/settings');
             },
-            icon: Icon(
-              Icons.settings_outlined,
-              color: colors.onSurfaceVariant,
-            ),
+            icon: Icon(Icons.settings_outlined, color: colors.onSurfaceVariant),
           ),
         ],
       ),
