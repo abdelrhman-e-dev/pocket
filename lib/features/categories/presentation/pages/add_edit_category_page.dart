@@ -98,14 +98,32 @@ class _AddEditCategoryPageState extends ConsumerState<AddEditCategoryPage> {
       ref.invalidate(transactionCategoriesProvider(TransactionType.expense));
       ref.invalidate(transactionCategoriesProvider(TransactionType.income));
 
-      if (mounted) {
-        context.pop();
-      }
-    } catch (error) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
+        SnackBar(
+          content: Text(
+            widget.isEditing ? 'تم تحديث التصنيف بنجاح' : 'تم إضافة التصنيف بنجاح',
+          ),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      context.pop();
+    } catch (error) {
+      if (!mounted) return;
+
+      final message = error is Exception
+          ? error.toString().replaceFirst('Exception: ', '')
+          : 'حدث خطأ أثناء حفظ التصنيف';
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
       );
     }
   }

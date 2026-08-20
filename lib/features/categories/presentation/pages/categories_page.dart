@@ -167,10 +167,28 @@ class _CategoryTile extends ConsumerWidget {
                         ref.invalidate(
                           transactionCategoriesProvider(TransactionType.income),
                         );
-                      } catch (error) {
+
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(error.toString())),
+                          const SnackBar(
+                            content: Text('تم حذف التصنيف بنجاح'),
+                            behavior: SnackBarBehavior.floating,
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      } catch (error) {
+                        if (!context.mounted) return;
+
+                        final message = error is Exception
+                            ? error.toString().replaceFirst('Exception: ', '')
+                            : 'حدث خطأ أثناء حذف التصنيف';
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(message),
+                            behavior: SnackBarBehavior.floating,
+                            backgroundColor: Theme.of(context).colorScheme.error,
+                          ),
                         );
                       }
                     },
