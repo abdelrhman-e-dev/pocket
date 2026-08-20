@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-
+import '../../../../core/database/app_database.dart';
+import '../../../../shared/utils/category_icon_mapper.dart';
 
 class TransactionCategoryGrid extends StatelessWidget {
   const TransactionCategoryGrid({
@@ -138,13 +139,14 @@ class _CategoryItem extends StatelessWidget {
     required this.onTap,
   });
 
-  final dynamic category;
+  final Category category;
   final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final categoryColor = Color(category.color);
 
     return InkWell(
       borderRadius: BorderRadius.circular(16),
@@ -175,12 +177,12 @@ class _CategoryItem extends StatelessWidget {
               decoration: BoxDecoration(
                 color: selected
                     ? colors.primaryContainer
-                    : colors.surfaceContainerHighest,
+                    : categoryColor.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                _getCategoryIcon(category.name),
-                color: colors.primary,
+                categoryIconFromKey(category.icon),
+                color: categoryColor,
                 size: 22,
               ),
             ),
@@ -267,48 +269,5 @@ class _MoreCategoryItem extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-IconData _getCategoryIcon(String name) {
-  switch (name) {
-    case 'طعام':
-      return Icons.restaurant_rounded;
-
-    case 'مواصلات':
-      return Icons.directions_car_rounded;
-
-    case 'تسوق':
-      return Icons.shopping_bag_rounded;
-
-    case 'إيجار':
-      return Icons.home_rounded;
-
-    case 'صحة':
-      return Icons.health_and_safety_rounded;
-
-    case 'تعليم':
-      return Icons.school_rounded;
-
-    case 'فواتير':
-      return Icons.receipt_long_rounded;
-
-    case 'ترفيه':
-      return Icons.movie_rounded;
-
-    case 'راتب':
-      return Icons.payments_rounded;
-
-    case 'مكافأة':
-      return Icons.card_giftcard_rounded;
-
-    case 'تحويل':
-      return Icons.swap_horiz_rounded;
-
-    case 'استثمار':
-      return Icons.trending_up_rounded;
-
-    default:
-      return Icons.category_rounded;
   }
 }
