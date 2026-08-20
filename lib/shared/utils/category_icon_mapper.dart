@@ -22,6 +22,18 @@ IconData categoryIconFromKey(String icon) {
       return Icons.work_rounded;
     case 'swap_horiz':
       return Icons.swap_horiz_rounded;
+    case 'local_offer':
+      return Icons.local_offer_rounded;
+    case 'shopping_bag':
+      return Icons.shopping_bag_rounded;
+    case 'card_giftcard':
+      return Icons.card_giftcard_rounded;
+    case 'health_and_safety':
+      return Icons.health_and_safety_rounded;
+    case 'school':
+      return Icons.school_rounded;
+    case 'trending_up':
+      return Icons.trending_up_rounded;
     default:
       return Icons.category_rounded;
   }
