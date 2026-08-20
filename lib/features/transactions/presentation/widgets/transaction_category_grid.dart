@@ -3,45 +3,62 @@ import 'package:flutter/material.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../shared/utils/category_icon_mapper.dart';
 
-class TransactionCategoryGrid extends StatelessWidget {
+class TransactionCategoryGrid extends StatefulWidget {
   const TransactionCategoryGrid({
     super.key,
     required this.categories,
     required this.selectedCategoryId,
     required this.onCategorySelected,
+    this.onAddCategoryPressed,
   });
 
-  final List categories;
+  final List<Category> categories;
   final int? selectedCategoryId;
   final ValueChanged<int> onCategorySelected;
+  final VoidCallback? onAddCategoryPressed;
 
   static const int _visibleCount = 7;
 
   @override
+  State<TransactionCategoryGrid> createState() => _TransactionCategoryGridState();
+}
+
+class _TransactionCategoryGridState extends State<TransactionCategoryGrid> {
+  bool _showAll = false;
+
+  @override
   Widget build(BuildContext context) {
-    if (categories.isEmpty) {
+    if (widget.categories.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    final hasMore = categories.length > _visibleCount;
+    final visibleCategories = _showAll
+        ? widget.categories
+        : widget.categories.take(TransactionCategoryGrid._visibleCount).toList();
 
-    final visibleCategories = hasMore
-        ? categories.take(_visibleCount).toList()
-        : categories;
-
-    final items = [
+    final items = <Widget>[
       ...visibleCategories.map(
         (category) => _CategoryItem(
           category: category,
-          selected: selectedCategoryId == category.id,
-          onTap: () => onCategorySelected(category.id),
+          selected: widget.selectedCategoryId == category.id,
+          onTap: () => widget.onCategorySelected(category.id),
         ),
       ),
-      if (hasMore)
-        _MoreCategoryItem(
-          onTap: () => _showAllCategories(context),
-        ),
     ];
+
+    if (!_showAll && widget.categories.length > TransactionCategoryGrid._visibleCount) {
+      items.add(
+        _MoreCategoryItem(
+          onTap: () => setState(() => _showAll = true),
+        ),
+      );
+    }
+
+    items.add(
+      _AddCategoryItem(
+        onTap: widget.onAddCategoryPressed ?? () {},
+      ),
+    );
 
     return GridView.count(
       crossAxisCount: 4,
@@ -52,82 +69,6 @@ class TransactionCategoryGrid extends StatelessWidget {
       padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
       children: items,
-    );
-  }
-
-  void _showAllCategories(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .outlineVariant,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-
-          
-
-                Text(
-                  'اختر التصنيف',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-
-          
-
-                Flexible(
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    itemCount: categories.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      crossAxisSpacing: 30,
-                      mainAxisSpacing: 14,
-                      childAspectRatio: 0.9,
-                    ),
-                    itemBuilder: (context, index) {
-                      final category = categories[index];
-
-                      return _CategoryItem(
-                        category: category,
-                        selected:
-                            selectedCategoryId == category.id,
-                        onTap: () {
-                          onCategorySelected(category.id);
-                          Navigator.pop(context);
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }
@@ -224,7 +165,6 @@ class _MoreCategoryItem extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
       child: Container(
-
         padding: const EdgeInsets.symmetric(
           horizontal: 6,
           vertical: 8,
@@ -247,16 +187,72 @@ class _MoreCategoryItem extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.add_rounded,
+                Icons.more_horiz_rounded,
                 color: colors.primary,
                 size: 24,
               ),
             ),
-
             const SizedBox(height: 6),
-
             Text(
               'المزيد',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AddCategoryItem extends StatelessWidget {
+  const _AddCategoryItem({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 6,
+          vertical: 8,
+        ),
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: colors.outlineVariant,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: colors.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.add_rounded,
+                color: colors.onPrimaryContainer,
+                size: 24,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'إضافة',
               style: Theme.of(context)
                   .textTheme
                   .bodySmall

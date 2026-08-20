@@ -155,13 +155,24 @@ class _CategoryTile extends ConsumerWidget {
 
                       if (confirmed != true) return;
 
-                      await ref
-                          .read(categoryRepositoryProvider)
-                          .deleteCategory(category.id);
+                      try {
+                        await ref
+                            .read(categoryRepositoryProvider)
+                            .deleteCategory(category.id);
 
-                      ref.invalidate(allCategoriesProvider);
-                      ref.invalidate(transactionCategoriesProvider(TransactionType.expense));
-                      ref.invalidate(transactionCategoriesProvider(TransactionType.income));
+                        ref.invalidate(allCategoriesProvider);
+                        ref.invalidate(
+                          transactionCategoriesProvider(TransactionType.expense),
+                        );
+                        ref.invalidate(
+                          transactionCategoriesProvider(TransactionType.income),
+                        );
+                      } catch (error) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(error.toString())),
+                        );
+                      }
                     },
                   ),
               ],

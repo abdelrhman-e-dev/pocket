@@ -188,6 +188,10 @@ class _AddTransactionPageState extends ConsumerState<AddTransactionPage> {
                         _selectedCategoryId = categoryId;
                       });
                     },
+                    onAddCategoryPressed: () async {
+                      await context.push('/categories/add');
+                      ref.invalidate(transactionCategoriesProvider(selectedType));
+                    },
                   );
                 },
               ),
