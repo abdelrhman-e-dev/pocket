@@ -11,6 +11,7 @@ import '../widgets/dashboard_summary.dart';
 import '../widgets/dashboard_accounts.dart';
 import '../../providers/dashboard_summary_provider.dart';
 import '../../../../shared/components/navigation/app_bottom_navigation.dart';
+import '../widgets/income_expense_progress.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -56,7 +57,12 @@ class DashboardPage extends ConsumerWidget {
                     income: summaryData.income,
                     accountsCount: items.length,
                   ),
+                  const SizedBox(height: 24),
 
+                  IncomeExpenseProgress(
+                    income: summaryData.income,
+                    expenses: summaryData.expenses,
+                  ),
                   const SizedBox(height: 24),
 
                   DashboardAccounts(
