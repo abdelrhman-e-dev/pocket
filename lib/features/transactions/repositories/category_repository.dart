@@ -160,6 +160,14 @@ class CategoryRepository {
       throw Exception('لا يمكن حذف تصنيف أساسي');
     }
 
+    final hasTransactions = await (_database.select(
+      _database.transactions,
+    )..where((table) => table.categoryId.equals(categoryId))).getSingleOrNull();
+
+    if (hasTransactions != null) {
+      throw Exception('لا يمكن حذف تصنيف لديه معاملات');
+    }
+
     await (_database.delete(
       _database.categories,
     )..where((table) => table.id.equals(categoryId))).go();
