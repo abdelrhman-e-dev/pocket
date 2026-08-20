@@ -1,5 +1,5 @@
 import 'package:go_router/go_router.dart';
-
+import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/accounts/presentation/pages/create_account_page.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
@@ -34,6 +34,10 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/accounts',
       builder: (context, state) => const AccountsPage(),
+    ),
+        GoRoute(
+      path: '/settings',
+      builder: (context, state) => const SettingsPage(),
     ),
     GoRoute(
       path: '/accounts/details',
