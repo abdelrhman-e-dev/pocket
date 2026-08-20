@@ -17,6 +17,9 @@ import '../../core/database/app_database.dart';
 import '../../features/accounts/presentation/pages/account_details_page.dart';
 import '../../features/accounts/presentation/pages/edit_account_page.dart';
 import '../../features/reports/presentation/pages/reports_page.dart';
+import '../../features/categories/presentation/pages/add_edit_category_page.dart';
+import '../../features/categories/presentation/pages/categories_page.dart';
+
 final GoRouter router = GoRouter(
   initialLocation: '/',
 
@@ -61,6 +64,22 @@ final GoRouter router = GoRouter(
         final transaction = state.extra as TransactionWithDetails;
 
         return AddTransactionPage(transaction: transaction);
+      },
+    ),
+    GoRoute(
+      path: '/categories',
+      builder: (context, state) => const CategoriesPage(),
+    ),
+    GoRoute(
+      path: '/categories/add',
+      builder: (context, state) => const AddEditCategoryPage(),
+    ),
+    GoRoute(
+      path: '/categories/edit',
+      builder: (context, state) {
+        final category = state.extra as Category;
+
+        return AddEditCategoryPage(category: category);
       },
     ),
     GoRoute(
