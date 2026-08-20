@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../shared/components/app_top_bar.dart';
 import '../../../../shared/components/navigation/app_bottom_navigation.dart';
 import '../../providers/account_repository_provider.dart';
 
@@ -25,32 +26,9 @@ class AccountsPage extends ConsumerWidget {
         child: Scaffold(
           backgroundColor: colors.surface,
 
-          appBar: AppBar(
-            backgroundColor: colors.surface,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-
-            titleSpacing: 20,
-
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'الحسابات',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'إدارة أموالك وحساباتك',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-
+          appBar: AppTopBar(
+            title: 'الحسابات',
+            subtitle: 'إدارة أموالك وحساباتك',
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_rounded),
               onPressed: () {

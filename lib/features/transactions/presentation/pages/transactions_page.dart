@@ -9,6 +9,7 @@ import '../../providers/filtered_transactions_provider.dart';
 import '../widgets/transaction_filter_chips.dart';
 import '../widgets/transaction_list_tile.dart';
 import '../widgets/transactions_summary_card.dart';
+import '../../../../shared/components/app_top_bar.dart';
 import '../../../../shared/components/navigation/app_bottom_navigation.dart';
 import '../widgets/transaction_period_filter.dart';
 
@@ -79,17 +80,34 @@ class TransactionsPage extends ConsumerWidget {
                   pinned: true,
                   backgroundColor: colors.surface,
                   surfaceTintColor: Colors.transparent,
-                  centerTitle: true,
-                  title: const Text('العمليات'),
-                  leading: IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () {
-                      if (context.canPop()) {
-                        context.pop();
-                      } else {
-                        context.go('/dashboard');
-                      }
-                    },
+                  automaticallyImplyLeading: false,
+                  toolbarHeight: 72,
+                  titleSpacing: 0,
+                  title: Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 12, end: 8),
+                    child: Row(
+                      textDirection: TextDirection.rtl,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back),
+                          onPressed: () {
+                            if (context.canPop()) {
+                              context.pop();
+                            } else {
+                              context.go('/dashboard');
+                            }
+                          },
+                        ),
+                        const Expanded(
+                          child: Text(
+                            'العمليات',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                          ),
+                        ),
+                        const SizedBox(width: 48),
+                      ],
+                    ),
                   ),
                 ),
 

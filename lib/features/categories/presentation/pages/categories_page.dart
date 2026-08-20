@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/database/app_database.dart';
+import '../../../../shared/components/app_top_bar.dart';
 import '../../../../shared/utils/category_icon_mapper.dart';
 import '../../../transactions/models/transaction_type.dart';
 import '../../../transactions/providers/category_repository_provider.dart';
@@ -20,9 +21,8 @@ class CategoriesPage extends ConsumerWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: colors.surface,
-        appBar: AppBar(
-          title: const Text('التصنيفات'),
-          centerTitle: true,
+        appBar: AppTopBar(
+          title: 'التصنيفات',
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded),
             onPressed: () {

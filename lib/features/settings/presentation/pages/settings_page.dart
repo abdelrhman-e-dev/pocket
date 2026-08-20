@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../shared/components/app_top_bar.dart';
+
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
@@ -12,9 +14,8 @@ class SettingsPage extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: colors.surface,
-        appBar: AppBar(
-          title: const Text('الإعدادات'),
-          centerTitle: true,
+        appBar: AppTopBar(
+          title: 'الإعدادات',
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded),
             onPressed: () {

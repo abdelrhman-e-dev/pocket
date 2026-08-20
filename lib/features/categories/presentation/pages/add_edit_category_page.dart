@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/database/app_database.dart';
+import '../../../../shared/components/app_top_bar.dart';
 import '../../../../shared/utils/category_icon_mapper.dart';
 import '../../../transactions/models/transaction_type.dart';
 import '../../../transactions/providers/category_repository_provider.dart';
@@ -137,9 +138,8 @@ class _AddEditCategoryPageState extends ConsumerState<AddEditCategoryPage> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: colors.surface,
-        appBar: AppBar(
-          title: Text(title),
-          centerTitle: true,
+        appBar: AppTopBar(
+          title: title,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_rounded),
             onPressed: () => context.pop(),
