@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:app_settings/app_settings.dart';
 
 import '../../../../core/database/database_provider.dart';
 import '../../../accounts/providers/account_repository_provider.dart';
@@ -13,6 +14,7 @@ import '../../../transactions/providers/paginated_transactions_provider.dart';
 import '../../../transactions/providers/recent_transactions_provider.dart';
 import '../../../transactions/providers/recent_transactions_with_details_provider.dart';
 import '../../../../shared/components/app_top_bar.dart';
+import '../../providers/reminder_settings_provider.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -129,6 +131,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         body: ListView(
           padding: const EdgeInsets.all(20),
           children: [
+            const _ReminderSection(),
+            const SizedBox(height: 12),
             _SettingsTile(
               icon: Icons.category_outlined,
               title: 'إدارة التصنيفات',
@@ -152,6 +156,85 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               title: 'عن التطبيق',
               onTap: () {},
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReminderSection extends ConsumerWidget {
+  const _ReminderSection();
+
+  Future<void> _pickTime(BuildContext context, WidgetRef ref) async {
+    final current = ref.read(reminderSettingsProvider).time;
+    final selected = await showTimePicker(
+      context: context,
+      initialTime: current,
+      helpText: 'اختر وقت التذكير اليومي',
+    );
+    if (selected != null) {
+      await ref.read(reminderSettingsProvider.notifier).setTime(selected);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(reminderSettingsProvider);
+    final timeLabel = MaterialLocalizations.of(context).formatTimeOfDay(
+      settings.time,
+      alwaysUse24HourFormat: false,
+    );
+
+    return Material(
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'التذكيرات',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('تفعيل التذكير اليومي'),
+              value: settings.enabled,
+              onChanged: (enabled) async {
+                await ref
+                    .read(reminderSettingsProvider.notifier)
+                    .setEnabled(enabled);
+              },
+            ),
+            if (settings.enabled)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.schedule_outlined),
+                title: const Text('وقت التذكير'),
+                trailing: Text(timeLabel),
+                onTap: () => _pickTime(context, ref),
+              ),
+            if (settings.permissionDenied)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text('السماح بالتنبيهات مطلوب لتفعيل التذكير.'),
+                    ),
+                    TextButton(
+                      onPressed: () => AppSettings.openAppSettings(
+                        type: AppSettingsType.notification,
+                      ),
+                      child: const Text('فتح الإعدادات'),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
