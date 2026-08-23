@@ -7,9 +7,13 @@ void main() {
     () async {
       final db = AppDatabase();
 
-      expect(db.schemaVersion, 1);
+      expect(db.schemaVersion, 2);
       expect(db.migration.onCreate, isNotNull);
       expect(db.migration.onUpgrade, isNotNull);
+
+      final profile = await db.select(db.userProfiles).getSingle();
+      expect(profile.id, 1);
+      expect(profile.name, isNull);
 
       await db.close();
     },

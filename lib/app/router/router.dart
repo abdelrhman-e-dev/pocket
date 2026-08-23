@@ -3,6 +3,7 @@ import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/accounts/presentation/pages/create_account_page.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
+import '../../features/profile/presentation/pages/enter_name_page.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/transactions/presentation/pages/add_transaction_page.dart';
 import '../../features/transactions/presentation/pages/transactions_page.dart';
@@ -38,7 +39,7 @@ final GoRouter router = GoRouter(
       path: '/accounts',
       builder: (context, state) => const AccountsPage(),
     ),
-        GoRoute(
+    GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsPage(),
     ),
@@ -120,6 +121,10 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const OnboardingPage(),
     ),
     GoRoute(
+      path: '/enter-name',
+      builder: (context, state) => const EnterNamePage(),
+    ),
+    GoRoute(
       path: '/add-transaction',
       builder: (context, state) => const AddTransactionPage(),
     ),
@@ -133,10 +138,10 @@ final GoRouter router = GoRouter(
       },
     ),
     GoRoute(
-  path: '/reports',
-  builder: (context, state) {
-    return const ReportsPage();
-  },
-),
+      path: '/reports',
+      builder: (context, state) {
+        return const ReportsPage();
+      },
+    ),
   ],
 );
