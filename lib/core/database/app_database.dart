@@ -9,21 +9,30 @@ import 'tables/accounts.dart';
 import 'tables/categories.dart';
 import 'tables/transactions.dart';
 import 'tables/transfers.dart';
+import 'tables/user_profiles.dart';
 part 'app_database.g.dart';
 
 @DriftDatabase(
-  tables: [Accounts, Categories, Transactions, Transfers],
+  tables: [Accounts, Categories, Transactions, Transfers, UserProfiles],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (migrator) async {
       await migrator.createAll();
+      final now = DateTime.now();
+      await into(userProfiles).insert(
+        UserProfilesCompanion.insert(
+          id: const Value(1),
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
     },
     onUpgrade: (migrator, from, to) async {
       if (from < 1) {
@@ -32,9 +41,17 @@ class AppDatabase extends _$AppDatabase {
         );
       }
 
-      // Future schema changes must be added here as incremental, data-preserving
-      // migrations such as: if (from < 2) { ... }
-      // This keeps existing data intact while allowing upgrades across multiple app versions.
+      if (from < 2) {
+        await migrator.createTable(userProfiles);
+        final now = DateTime.now();
+        await into(userProfiles).insert(
+          UserProfilesCompanion.insert(
+            id: const Value(1),
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+      }
     },
     beforeOpen: (details) async {
       if (details.hadUpgrade) {
