@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app_settings/app_settings.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 import '../../../../core/database/database_provider.dart';
 import '../../../accounts/providers/account_repository_provider.dart';
@@ -178,13 +179,78 @@ class _ReminderSection extends ConsumerWidget {
     }
   }
 
+  Future<void> _pickTimezone(BuildContext context, WidgetRef ref) async {
+    final controller = TextEditingController();
+    final timezones = ref
+        .read(reminderSettingsProvider.notifier)
+        .availableTimezones;
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          final query = controller.text.toLowerCase();
+          final filtered = timezones
+              .where((timezone) => timezone.toLowerCase().contains(query))
+              .take(80)
+              .toList();
+          return AlertDialog(
+            title: const Text('المنطقة الزمنية'),
+            content: SizedBox(
+              width: double.maxFinite,
+              height: 420,
+              child: Column(
+                children: [
+                  TextField(
+                    controller: controller,
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.search),
+                      hintText: 'ابحث عن مدينة أو منطقة',
+                    ),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) => ListTile(
+                        title: Text(filtered[index]),
+                        onTap: () => Navigator.pop(context, filtered[index]),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    controller.dispose();
+    if (selected != null) {
+      await ref.read(reminderSettingsProvider.notifier).setTimezone(selected);
+    }
+  }
+
+  String _offsetLabel(String timezone) {
+    final localOffset = DateTime.now().timeZoneOffset;
+    final selectedOffset = tz.getLocation(timezone).currentTimeZone.offset;
+    final difference = Duration(
+      milliseconds: selectedOffset - localOffset.inMilliseconds,
+    );
+    final sign = difference.isNegative ? '-' : '+';
+    final absolute = difference.abs();
+    final hours = absolute.inHours;
+    final minutes = absolute.inMinutes.remainder(60);
+    final formatted = minutes == 0 ? '$hours س' : '$hours س و $minutes د';
+    return 'فرق التوقيت عن جهازك: $sign$formatted';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(reminderSettingsProvider);
-    final timeLabel = MaterialLocalizations.of(context).formatTimeOfDay(
-      settings.time,
-      alwaysUse24HourFormat: false,
-    );
+    final timeLabel = MaterialLocalizations.of(
+      context,
+    ).formatTimeOfDay(settings.time, alwaysUse24HourFormat: false);
 
     return Material(
       color: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -196,9 +262,9 @@ class _ReminderSection extends ConsumerWidget {
           children: [
             Text(
               'التذكيرات',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
@@ -218,6 +284,16 @@ class _ReminderSection extends ConsumerWidget {
                 trailing: Text(timeLabel),
                 onTap: () => _pickTime(context, ref),
               ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.public_outlined),
+              title: const Text('المنطقة الزمنية للتذكير'),
+              subtitle: Text(
+                '${settings.timezone}\n${_offsetLabel(settings.timezone)}',
+              ),
+              trailing: const Icon(Icons.chevron_left_rounded),
+              onTap: () => _pickTimezone(context, ref),
+            ),
             if (settings.permissionDenied)
               Padding(
                 padding: const EdgeInsets.only(top: 4),

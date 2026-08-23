@@ -9,6 +9,7 @@ class NotificationService {
 
   static final instance = NotificationService._();
   static const reminderNotificationId = 1001;
+  static const timezonePreferenceKey = 'daily_reminder_timezone';
 
   final _notifications = FlutterLocalNotificationsPlugin();
   bool _initialized = false;
@@ -29,10 +30,14 @@ class NotificationService {
   }
 
   Future<bool> requestPermission() async {
-    final android = _notifications.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    final iOS = _notifications.resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>();
+    final android = _notifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    final iOS = _notifications
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
 
     final androidGranted = await android?.requestNotificationsPermission();
     final iOSGranted = await iOS?.requestPermissions(
@@ -46,11 +51,25 @@ class NotificationService {
         (exactAlarmGranted ?? true);
   }
 
-  Future<void> restoreFromPreferences(SharedPreferencesAsync preferences) async {
+  Future<void> restoreFromPreferences(
+    SharedPreferencesAsync preferences,
+  ) async {
+    final timezone = await preferences.getString(timezonePreferenceKey);
+    if (timezone != null) {
+      try {
+        setTimezone(timezone);
+      } catch (_) {
+        setTimezone('UTC');
+      }
+    }
     if (await preferences.getBool('daily_reminder_enabled') != true) return;
     final hour = await preferences.getInt('daily_reminder_hour') ?? 21;
     final minute = await preferences.getInt('daily_reminder_minute') ?? 0;
     await scheduleDaily(TimeOfDay(hour: hour, minute: minute));
+  }
+
+  void setTimezone(String timezone) {
+    tz.setLocalLocation(tz.getLocation(timezone));
   }
 
   Future<void> scheduleDaily(TimeOfDay time) async {
