@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-class DashboardHeader extends StatelessWidget {
+
+import '../../../profile/providers/user_profile_provider.dart';
+
+class DashboardHeader extends ConsumerWidget {
   const DashboardHeader({super.key});
 
   String _getGreeting(int hour) {
@@ -50,9 +54,10 @@ class DashboardHeader extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
     final now = DateTime.now();
+    final profile = ref.watch(userProfileProvider).valueOrNull;
 
     final greeting = _getGreeting(now.hour);
     final icon = _getGreetingIcon(now.hour);
@@ -71,7 +76,9 @@ class DashboardHeader extends StatelessWidget {
                     Icon(icon, size: 22, color: colors.primary),
                     const SizedBox(width: 6),
                     Text(
-                      '$greeting، عبد الرحمن',
+                      profile?.name == null
+                          ? greeting
+                          : '$greeting، ${profile!.name}',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: colors.onSurface,
                         fontWeight: FontWeight.bold,

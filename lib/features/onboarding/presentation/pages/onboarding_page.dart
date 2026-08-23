@@ -118,7 +118,7 @@ class OnboardingPage extends StatelessWidget {
 
                             child: FilledButton(
                               onPressed: () {
-                                context.go('/create-account');
+                                context.go('/enter-name');
                               },
 
                               child: const Text(

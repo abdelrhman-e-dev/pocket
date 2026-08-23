@@ -12,15 +12,69 @@ import '../widgets/dashboard_accounts.dart';
 import '../../providers/dashboard_summary_provider.dart';
 import '../../../../shared/components/navigation/app_bottom_navigation.dart';
 import '../widgets/income_expense_progress.dart';
+import '../../../profile/providers/user_profile_provider.dart';
 
-class DashboardPage extends ConsumerWidget {
+class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends ConsumerState<DashboardPage> {
+  bool _nameDialogShown = false;
+
+  void _showNameDialog() {
+    if (_nameDialogShown || !mounted) return;
+    _nameDialogShown = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final controller = TextEditingController();
+      final formKey = GlobalKey<FormState>();
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: const Text('ما الذي يمكنني مناداتك به؟'),
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: controller,
+              autofocus: true,
+              textDirection: TextDirection.rtl,
+              decoration: const InputDecoration(labelText: 'اسمك'),
+              validator: (value) => value == null || value.trim().isEmpty
+                  ? 'من فضلك أدخل اسمك'
+                  : null,
+            ),
+          ),
+          actions: [
+            FilledButton(
+              onPressed: () async {
+                if (!formKey.currentState!.validate()) return;
+                await ref
+                    .read(userProfileRepositoryProvider)
+                    .saveName(controller.text);
+                if (context.mounted) Navigator.of(context).pop();
+              },
+              child: const Text('حفظ'),
+            ),
+          ],
+        ),
+      );
+      controller.dispose();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final accounts = ref.watch(dashboardProvider);
     final transactions = ref.watch(recentTransactionsWithDetailsProvider);
     final summary = ref.watch(dashboardSummaryProvider);
+    ref.listen(userProfileProvider, (_, next) {
+      if (next.hasValue && next.value == null) _showNameDialog();
+    });
     return Scaffold(
       body: accounts.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -28,6 +82,10 @@ class DashboardPage extends ConsumerWidget {
         error: (e, _) => Center(child: Text(e.toString())),
 
         data: (items) {
+          final profile = ref.watch(userProfileProvider);
+          if (items.isNotEmpty && profile.hasValue && profile.value == null) {
+            _showNameDialog();
+          }
           if (items.isEmpty) {
             return const EmptyDashboard();
           }
