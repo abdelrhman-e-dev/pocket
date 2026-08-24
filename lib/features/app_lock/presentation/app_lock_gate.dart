@@ -102,7 +102,22 @@ class _LockScreen extends StatelessWidget {
               const SizedBox(height: 20),
               Text('Pocket', style: Theme.of(context).textTheme.headlineMedium),
               const SizedBox(height: 32),
-              Icon(Icons.fingerprint_rounded, size: 88, color: colors.primary),
+              Semantics(
+                button: true,
+                label: 'فتح التطبيق بالبصمة',
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(64),
+                  onTap: authenticating ? null : onUnlock,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Icon(
+                      Icons.fingerprint_rounded,
+                      size: 88,
+                      color: colors.primary,
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(height: 16),
               const Text('المس لفتح التطبيق'),
               const SizedBox(height: 24),
