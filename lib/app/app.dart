@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'router/router.dart';
 import 'theme.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import '../features/app_lock/presentation/app_lock_gate.dart';
 
 class PocketApp extends StatelessWidget {
   const PocketApp({super.key});
@@ -24,7 +25,10 @@ class PocketApp extends StatelessWidget {
       ],
 
       builder: (context, child) {
-        return Directionality(textDirection: TextDirection.rtl, child: child!);
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AppLockGate(child: child!),
+        );
       },
 
       routerConfig: router,

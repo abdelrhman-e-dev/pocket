@@ -16,6 +16,7 @@ import '../../../transactions/providers/recent_transactions_provider.dart';
 import '../../../transactions/providers/recent_transactions_with_details_provider.dart';
 import '../../../../shared/components/app_top_bar.dart';
 import '../../providers/reminder_settings_provider.dart';
+import '../../../app_lock/providers/app_lock_provider.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -134,6 +135,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           children: [
             const _ReminderSection(),
             const SizedBox(height: 12),
+            const _SecuritySection(),
+            const SizedBox(height: 12),
             _SettingsTile(
               icon: Icons.category_outlined,
               title: 'إدارة التصنيفات',
@@ -159,6 +162,44 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SecuritySection extends ConsumerWidget {
+  const _SecuritySection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(appLockProvider);
+    return Material(
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(16),
+      child: SwitchListTile(
+        title: const Text('الأمان'),
+        subtitle: const Text('قفل التطبيق ببصمة الإصبع'),
+        secondary: const Icon(Icons.fingerprint_rounded),
+        value: settings.enabled,
+        onChanged: settings.initialized
+            ? (enabled) async {
+                final controller = ref.read(appLockProvider.notifier);
+                if (enabled) {
+                  final success = await controller.enable();
+                  if (!success && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'لا توجد وسيلة مصادقة متاحة. فعّل رمز قفل أو بصمة من إعدادات جهاز Samsung: الأمان والخصوصية > القياسات الحيوية والأمان > بصمات الأصابع.',
+                        ),
+                      ),
+                    );
+                  }
+                } else {
+                  await controller.disable();
+                }
+              }
+            : null,
       ),
     );
   }
