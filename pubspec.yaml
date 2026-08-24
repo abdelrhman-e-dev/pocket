@@ -60,6 +60,7 @@ dependencies:
   collection: ^1.19.1
   excel: ^4.0.6
   share_plus: ^13.3.0
+  local_auth: ^3.0.2
 
 dev_dependencies:
   flutter_test:
