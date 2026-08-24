@@ -108,6 +108,49 @@ The onboarding flow leads the user to the account creation screen.
 
 ---
 
+### 🔐 App Lock
+
+Pocket can protect financial data with the device's built-in authentication:
+
+* Optional app lock enabled from Settings.
+* Fingerprint authentication on supported devices.
+* Device PIN, pattern, or password fallback through the Android system prompt.
+* Authentication before the app content is accessible after a cold start.
+* Automatic re-lock after the app has been in the background for more than 30 seconds.
+* A dedicated lock screen with retry support and no navigation access while locked.
+* The setting is persisted locally and remains enabled after the app is killed.
+
+Enabling the lock requires a successful authentication first. If the device has no
+configured biometric or device credential, the user is directed to configure one
+in the device security settings.
+
+---
+
+### 📊 Reports
+
+Pocket includes financial reports with:
+
+* Income and expense summaries.
+* Spending by category.
+* Spending by account.
+* Period-based filtering.
+* Visual charts for understanding financial activity.
+
+---
+
+### ⚙️ Settings
+
+The Settings screen currently provides:
+
+* Daily reminder configuration.
+* Reminder time and timezone selection.
+* App lock management.
+* Category management access.
+* Exporting data to Excel.
+* Resetting all local financial data.
+
+---
+
 ### 🌐 Arabic & RTL
 
 Pocket is designed primarily for Arabic users.
@@ -153,6 +196,9 @@ The design is intentionally centralized so the application's visual identity can
 | GoRouter   | Navigation            |
 | Drift      | Local database        |
 | SQLite     | Local data storage    |
+| SharedPreferences | Local preferences |
+| local_auth | Biometric/device authentication |
+| app_settings | Opening device settings |
 | Material 3 | UI system             |
 | Cairo      | Arabic typography     |
 
@@ -182,7 +228,10 @@ lib/
 │   ├── accounts/
 │   ├── dashboard/
 │   ├── transactions/
-│   └── categories/
+│   ├── categories/
+│   ├── reports/
+│   ├── settings/
+│   └── app_lock/
 │
 └── shared/
     └── components/
@@ -355,6 +404,7 @@ The main goals are:
 * Provide a clear overview of current finances.
 * Work offline.
 * Support Arabic users properly.
+* Protect sensitive financial data with device-level authentication.
 * Maintain a clean and scalable Flutter architecture.
 * Make the application easy to extend with future reporting and analytics features.
 
@@ -364,7 +414,7 @@ The main goals are:
 
 **Development — Active**
 
-The core database, account creation, transaction creation, balance updates, dashboard, onboarding, and recent transaction functionality are currently implemented.
+The core database, account creation, transaction creation, balance updates, dashboard, onboarding, reports, settings, reminders, data export, and app-lock functionality are currently implemented.
 
 The UI and design system are also being continuously refined before expanding the application's functionality.
 
