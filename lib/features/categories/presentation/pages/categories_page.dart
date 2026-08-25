@@ -39,8 +39,12 @@ class CategoriesPage extends ConsumerWidget {
               onPressed: () async {
                 await context.push('/categories/add');
                 ref.invalidate(allCategoriesProvider);
-                ref.invalidate(transactionCategoriesProvider(TransactionType.expense));
-                ref.invalidate(transactionCategoriesProvider(TransactionType.income));
+                ref.invalidate(
+                  transactionCategoriesProvider(TransactionType.expense),
+                );
+                ref.invalidate(
+                  transactionCategoriesProvider(TransactionType.income),
+                );
               },
             ),
           ],
@@ -49,7 +53,9 @@ class CategoriesPage extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(child: Text('$e')),
           data: (categories) {
-            final expense = categories.where((c) => c.type == 'expense').toList();
+            final expense = categories
+                .where((c) => c.type == 'expense')
+                .toList();
             final income = categories.where((c) => c.type == 'income').toList();
 
             return ListView(
@@ -77,7 +83,9 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     title,
-    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+    style: Theme.of(
+      context,
+    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
   );
 }
 
@@ -102,8 +110,12 @@ class _CategoryTile extends ConsumerWidget {
               : () async {
                   await context.push('/categories/edit', extra: category);
                   ref.invalidate(allCategoriesProvider);
-                  ref.invalidate(transactionCategoriesProvider(TransactionType.expense));
-                  ref.invalidate(transactionCategoriesProvider(TransactionType.income));
+                  ref.invalidate(
+                    transactionCategoriesProvider(TransactionType.expense),
+                  );
+                  ref.invalidate(
+                    transactionCategoriesProvider(TransactionType.income),
+                  );
                 },
           child: Padding(
             padding: const EdgeInsets.all(14),
@@ -129,24 +141,34 @@ class _CategoryTile extends ConsumerWidget {
                 if (category.isSystem)
                   Text(
                     'أساسي',
-                    style: TextStyle(color: colors.onSurfaceVariant, fontSize: 12),
+                    style: TextStyle(
+                      color: colors.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
                   )
                 else
                   IconButton(
-                    icon: Icon(Icons.delete_outline_rounded, color: colors.error),
+                    icon: Icon(
+                      Icons.delete_outline_rounded,
+                      color: colors.error,
+                    ),
                     onPressed: () async {
                       final confirmed = await showDialog<bool>(
                         context: context,
                         builder: (dialogContext) => AlertDialog(
                           title: const Text('حذف التصنيف'),
-                          content: const Text('هل أنت متأكد من حذف هذا التصنيف؟'),
+                          content: const Text(
+                            'هل أنت متأكد من حذف هذا التصنيف؟',
+                          ),
                           actions: [
                             TextButton(
-                              onPressed: () => Navigator.of(dialogContext).pop(false),
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(false),
                               child: const Text('إلغاء'),
                             ),
                             FilledButton(
-                              onPressed: () => Navigator.of(dialogContext).pop(true),
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(true),
                               child: const Text('حذف'),
                             ),
                           ],
@@ -162,7 +184,9 @@ class _CategoryTile extends ConsumerWidget {
 
                         ref.invalidate(allCategoriesProvider);
                         ref.invalidate(
-                          transactionCategoriesProvider(TransactionType.expense),
+                          transactionCategoriesProvider(
+                            TransactionType.expense,
+                          ),
                         );
                         ref.invalidate(
                           transactionCategoriesProvider(TransactionType.income),
@@ -170,10 +194,12 @@ class _CategoryTile extends ConsumerWidget {
 
                         if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text('تم حذف التصنيف بنجاح'),
                             behavior: SnackBarBehavior.floating,
-                            backgroundColor: Colors.green,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.tertiary,
                           ),
                         );
                       } catch (error) {
@@ -187,7 +213,9 @@ class _CategoryTile extends ConsumerWidget {
                           SnackBar(
                             content: Text(message),
                             behavior: SnackBarBehavior.floating,
-                            backgroundColor: Theme.of(context).colorScheme.error,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.error,
                           ),
                         );
                       }

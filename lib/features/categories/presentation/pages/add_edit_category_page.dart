@@ -17,7 +17,8 @@ class AddEditCategoryPage extends ConsumerStatefulWidget {
   bool get isEditing => category != null;
 
   @override
-  ConsumerState<AddEditCategoryPage> createState() => _AddEditCategoryPageState();
+  ConsumerState<AddEditCategoryPage> createState() =>
+      _AddEditCategoryPageState();
 }
 
 class _AddEditCategoryPageState extends ConsumerState<AddEditCategoryPage> {
@@ -80,19 +81,23 @@ class _AddEditCategoryPageState extends ConsumerState<AddEditCategoryPage> {
 
     try {
       if (widget.isEditing) {
-        await ref.read(categoryRepositoryProvider).updateCategory(
-          categoryId: widget.category!.id,
-          name: name,
-          color: _selectedColor,
-          icon: _selectedIcon,
-        );
+        await ref
+            .read(categoryRepositoryProvider)
+            .updateCategory(
+              categoryId: widget.category!.id,
+              name: name,
+              color: _selectedColor,
+              icon: _selectedIcon,
+            );
       } else {
-        await ref.read(categoryRepositoryProvider).createCategory(
-          name: name,
-          type: _selectedType,
-          color: _selectedColor,
-          icon: _selectedIcon,
-        );
+        await ref
+            .read(categoryRepositoryProvider)
+            .createCategory(
+              name: name,
+              type: _selectedType,
+              color: _selectedColor,
+              icon: _selectedIcon,
+            );
       }
 
       ref.invalidate(allCategoriesProvider);
@@ -104,10 +109,12 @@ class _AddEditCategoryPageState extends ConsumerState<AddEditCategoryPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            widget.isEditing ? 'تم تحديث التصنيف بنجاح' : 'تم إضافة التصنيف بنجاح',
+            widget.isEditing
+                ? 'تم تحديث التصنيف بنجاح'
+                : 'تم إضافة التصنيف بنجاح',
           ),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.green,
+          backgroundColor: Theme.of(context).colorScheme.tertiary,
         ),
       );
 
@@ -207,7 +214,8 @@ class _AddEditCategoryPageState extends ConsumerState<AddEditCategoryPage> {
                         child: ChoiceChip(
                           label: const Text('مصروف'),
                           selected: _selectedType == 'expense',
-                          onSelected: (_) => setState(() => _selectedType = 'expense'),
+                          onSelected: (_) =>
+                              setState(() => _selectedType = 'expense'),
                           selectedColor: colors.primaryContainer,
                           showCheckmark: false,
                         ),
@@ -217,7 +225,8 @@ class _AddEditCategoryPageState extends ConsumerState<AddEditCategoryPage> {
                         child: ChoiceChip(
                           label: const Text('دخل'),
                           selected: _selectedType == 'income',
-                          onSelected: (_) => setState(() => _selectedType = 'income'),
+                          onSelected: (_) =>
+                              setState(() => _selectedType = 'income'),
                           selectedColor: colors.primaryContainer,
                           showCheckmark: false,
                         ),
@@ -247,7 +256,9 @@ class _AddEditCategoryPageState extends ConsumerState<AddEditCategoryPage> {
                         child: Center(
                           child: Icon(
                             option.icon,
-                            color: selected ? colors.onPrimaryContainer : colors.onSurface,
+                            color: selected
+                                ? colors.onPrimaryContainer
+                                : colors.onSurface,
                             size: 28,
                           ),
                         ),
@@ -272,12 +283,18 @@ class _AddEditCategoryPageState extends ConsumerState<AddEditCategoryPage> {
                           color: Color(color),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: selected ? colors.onSurface : Colors.transparent,
+                            color: selected
+                                ? colors.onSurface
+                                : colors.surface.withValues(alpha: 0),
                             width: 3,
                           ),
                         ),
                         child: selected
-                            ? const Icon(Icons.check_rounded, color: Colors.white, size: 18)
+                            ? Icon(
+                                Icons.check_rounded,
+                                color: colors.onSurface,
+                                size: 18,
+                              )
                             : null,
                       ),
                     );
@@ -287,7 +304,9 @@ class _AddEditCategoryPageState extends ConsumerState<AddEditCategoryPage> {
                 FilledButton.icon(
                   onPressed: _saveCategory,
                   icon: const Icon(Icons.check_rounded),
-                  label: Text(widget.isEditing ? 'حفظ التغييرات' : 'إضافة التصنيف'),
+                  label: Text(
+                    widget.isEditing ? 'حفظ التغييرات' : 'إضافة التصنيف',
+                  ),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size.fromHeight(52),
                     shape: RoundedRectangleBorder(
@@ -313,9 +332,9 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.bold,
-      ),
+      style: Theme.of(
+        context,
+      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
     );
   }
 }
