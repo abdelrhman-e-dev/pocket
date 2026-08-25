@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 class AppTheme {
   // =========================
   // App Colors
@@ -61,19 +62,19 @@ class AppTheme {
         ),
     scaffoldBackgroundColor: backgroundColor,
 
-appBarTheme: const AppBarTheme(
-  backgroundColor: Colors.white,
-  foregroundColor: Color(0xFF172027),
-  centerTitle: true,
-  elevation: 0,
-  scrolledUnderElevation: 0,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.white,
+      foregroundColor: Color(0xFF172027),
+      centerTitle: true,
+      elevation: 0,
+      scrolledUnderElevation: 0,
 
-  systemOverlayStyle: SystemUiOverlayStyle(
-    statusBarColor: Colors.white,
-    statusBarIconBrightness: Brightness.dark,
-    statusBarBrightness: Brightness.light,
-  ),
-),
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.white,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
+    ),
 
     cardTheme: CardThemeData(
       color: surfaceColor,
@@ -153,12 +154,16 @@ appBarTheme: const AppBarTheme(
   // Dark Theme
   // =========================
 
-  static const Color darkBackgroundColor = Color(0xFF051F20);
-  static const Color darkSurfaceColor = Color(0xFF0B2B26);
-  static const Color darkTextColor = Color(0xFFDAF1DE);
-  static const Color darkPrimaryColor = Color(0xFF235347);
-  static const Color darkSecondaryColor = Color(0xFF8EB69B);
-  static const Color darkBorderColor = Color(0xFF163832);
+  static const Color darkBackgroundColor = Color(0xFF0A1520);
+  static const Color darkSurfaceColor = Color(0xFF101F2E);
+  static const Color darkSurfaceContainerColor = Color(0xFF16293A);
+  static const Color darkBorderColor = Color(0xFF26394A);
+  static const Color darkPrimaryColor = Color(0xFF5AC8E0);
+  static const Color darkSecondaryColor = Color(0xFF7B93A8);
+  static const Color darkTextColor = Color(0xFFE8F1F5);
+  static const Color darkTextVariantColor = Color(0xFF93A5B3);
+  static const Color darkErrorColor = Color(0xFFFF7A7A);
+  static const Color darkSuccessColor = Color(0xFF70D6A0);
 
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
@@ -166,21 +171,25 @@ appBarTheme: const AppBarTheme(
     colorScheme: ColorScheme.dark(
       brightness: Brightness.dark,
       primary: darkPrimaryColor,
-      onPrimary: darkTextColor,
+      onPrimary: darkBackgroundColor,
       secondary: darkSecondaryColor,
       onSecondary: darkBackgroundColor,
-      primaryContainer: Color(0xFF1F5549),
+      primaryContainer: darkSurfaceContainerColor,
       onPrimaryContainer: darkTextColor,
       surface: darkSurfaceColor,
       onSurface: darkTextColor,
+      onSurfaceVariant: darkTextVariantColor,
       surfaceContainerLowest: darkBackgroundColor,
-      surfaceContainerLow: Color(0xFF0D3230),
-      surfaceContainer: Color(0xFF0F4540),
+      surfaceContainerLow: darkSurfaceColor,
+      surfaceContainer: darkSurfaceContainerColor,
       surfaceContainerHigh: darkBorderColor,
+      surfaceContainerHighest: darkBorderColor,
       outline: darkBorderColor,
-      outlineVariant: Color(0xFF2A5A4E),
-      error: errorColor,
-      onError: darkTextColor,
+      outlineVariant: darkBorderColor,
+      tertiary: darkSuccessColor,
+      onTertiary: darkBackgroundColor,
+      error: darkErrorColor,
+      onError: darkBackgroundColor,
     ),
     scaffoldBackgroundColor: darkBackgroundColor,
     appBarTheme: const AppBarTheme(
@@ -232,7 +241,7 @@ appBarTheme: const AppBarTheme(
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         backgroundColor: darkPrimaryColor,
-        foregroundColor: darkTextColor,
+        foregroundColor: darkBackgroundColor,
         minimumSize: const Size(double.infinity, 54),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         textStyle: const TextStyle(
@@ -250,7 +259,7 @@ appBarTheme: const AppBarTheme(
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: darkPrimaryColor,
-      foregroundColor: darkTextColor,
+      foregroundColor: darkBackgroundColor,
     ),
     dividerTheme: const DividerThemeData(color: darkBorderColor, thickness: 1),
   );

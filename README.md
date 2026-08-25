@@ -167,7 +167,9 @@ The interface uses:
 
 ### 🎨 Theming
 
-The application currently uses a **light/white theme** with a centralized theme configuration.
+The application supports **light and dark themes** with a centralized theme configuration in
+`lib/app/theme.dart`. Widgets read colors from Flutter's active `ColorScheme`, so changing the
+theme palette does not require updating individual screens.
 
 The theme defines:
 
@@ -182,7 +184,22 @@ The theme defines:
 * Floating Action Buttons
 * Typography
 
-The design is intentionally centralized so the application's visual identity can be changed without modifying every screen individually.
+The dark theme uses the following palette:
+
+| Role | Color |
+| ---- | ----- |
+| Background | `#0A1520` |
+| Surface | `#101F2E` |
+| Surface container | `#16293A` |
+| Border / outline | `#26394A` |
+| Primary accent | `#5AC8E0` |
+| Secondary | `#7B93A8` |
+| Primary text | `#E8F1F5` |
+| Secondary text | `#93A5B3` |
+| Error | `#FF7A7A` |
+
+The design is intentionally centralized so the application's visual identity can be changed
+without modifying every screen individually.
 
 ---
 
