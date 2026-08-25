@@ -17,6 +17,7 @@ import '../../../transactions/providers/recent_transactions_with_details_provide
 import '../../../../shared/components/app_top_bar.dart';
 import '../../providers/reminder_settings_provider.dart';
 import '../../../app_lock/providers/app_lock_provider.dart';
+import '../../../../core/theme/theme_mode_provider.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -137,6 +138,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             const SizedBox(height: 12),
             const _SecuritySection(),
             const SizedBox(height: 12),
+            const _AppearanceSection(),
+            const SizedBox(height: 12),
             _SettingsTile(
               icon: Icons.category_outlined,
               title: 'إدارة التصنيفات',
@@ -200,6 +203,74 @@ class _SecuritySection extends ConsumerWidget {
                 }
               }
             : null,
+      ),
+    );
+  }
+}
+
+class _AppearanceSection extends ConsumerWidget {
+  const _AppearanceSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final colors = Theme.of(context).colorScheme;
+
+    return Material(
+      color: colors.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'المظهر',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: [
+                FilterChip(
+                  label: const Text('فاتح'),
+                  selected: themeMode == ThemeMode.light,
+                  onSelected: (selected) {
+                    if (selected) {
+                      ref
+                          .read(themeModeProvider.notifier)
+                          .setThemeMode(ThemeMode.light);
+                    }
+                  },
+                ),
+                FilterChip(
+                  label: const Text('داكن'),
+                  selected: themeMode == ThemeMode.dark,
+                  onSelected: (selected) {
+                    if (selected) {
+                      ref
+                          .read(themeModeProvider.notifier)
+                          .setThemeMode(ThemeMode.dark);
+                    }
+                  },
+                ),
+                FilterChip(
+                  label: const Text('تلقائي'),
+                  selected: themeMode == ThemeMode.system,
+                  onSelected: (selected) {
+                    if (selected) {
+                      ref
+                          .read(themeModeProvider.notifier)
+                          .setThemeMode(ThemeMode.system);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
