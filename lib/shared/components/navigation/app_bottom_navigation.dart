@@ -97,7 +97,9 @@ class _NavigationItemWidget extends StatelessWidget {
           height: 60,
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           decoration: BoxDecoration(
-            color: selected ? colors.primaryContainer : Colors.transparent,
+            color: selected
+                ? colors.primaryContainer
+                : colors.surface.withValues(alpha: 0),
             borderRadius: BorderRadius.circular(14),
           ),
           child: Column(

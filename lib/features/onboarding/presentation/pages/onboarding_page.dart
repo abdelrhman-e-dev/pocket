@@ -136,14 +136,16 @@ class OnboardingPage extends StatelessWidget {
                           // =========================
                           // Offline
                           // =========================
-                          const Row(
+                          Row(
                             mainAxisAlignment: MainAxisAlignment.center,
 
                             children: [
                               Icon(
                                 Icons.lock_outline,
                                 size: 14,
-                                color: Colors.black45,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
 
                               SizedBox(width: 5),
@@ -151,7 +153,9 @@ class OnboardingPage extends StatelessWidget {
                               Text(
                                 'يعمل دون اتصال بالإنترنت',
                                 style: TextStyle(
-                                  color: Colors.black45,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                   fontSize: 12,
                                 ),
                               ),

@@ -38,13 +38,13 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     return Scaffold(
       body: ColoredBox(
         color: Theme.of(context).colorScheme.primary,
-        child: const Center(
+        child: Center(
           child: Text(
             'Pocket',
             style: TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onPrimary,
             ),
           ),
         ),
