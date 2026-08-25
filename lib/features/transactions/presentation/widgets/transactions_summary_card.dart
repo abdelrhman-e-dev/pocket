@@ -53,7 +53,7 @@ class TransactionsSummaryCard extends StatelessWidget {
                         _StatColumn(
                           label: 'إجمالي الدخل',
                           value: income,
-                          color: Colors.green,
+                          color: colors.tertiary,
                         ),
                       ],
                     ),
@@ -67,9 +67,9 @@ class TransactionsSummaryCard extends StatelessWidget {
                   color: colors.primary,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.pie_chart_outline,
-                  color: Colors.white,
+                  color: colors.onPrimary,
                   size: 28,
                 ),
               ),

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/colors.dart';
-
 class TransactionTypeCard extends StatelessWidget {
   const TransactionTypeCard({
     super.key,
@@ -18,6 +16,8 @@ class TransactionTypeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Expanded(
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -27,13 +27,11 @@ class TransactionTypeCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: selected
-                ? AppColors.primary.withValues(alpha: 0.15)
-                : AppColors.surface,
+                ? colors.primary.withValues(alpha: 0.15)
+                : colors.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: selected
-                  ? AppColors.primary
-                  : AppColors.border,
+              color: selected ? colors.primary : colors.outline,
               width: selected ? 2 : 1,
             ),
           ),
@@ -41,16 +39,11 @@ class TransactionTypeCard extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                color: selected
-                    ? AppColors.primary
-                    : AppColors.textSecondary,
+                color: selected ? colors.primary : colors.onSurfaceVariant,
                 size: 32,
               ),
               const SizedBox(height: 12),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+              Text(title, style: Theme.of(context).textTheme.titleMedium),
             ],
           ),
         ),

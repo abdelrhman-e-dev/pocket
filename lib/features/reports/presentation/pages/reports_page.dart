@@ -78,8 +78,7 @@ class ReportsPage extends ConsumerWidget {
           end: DateTime(today.year, today.month + 1, 1),
         );
       case TransactionPeriodFilter.custom:
-        final selected =
-            customRange ?? DateTimeRange(start: today, end: today);
+        final selected = customRange ?? DateTimeRange(start: today, end: today);
         return DateTimeRange(
           start: selected.start,
           end: selected.end.add(const Duration(days: 1)),
@@ -655,9 +654,7 @@ class _TopCategories extends StatelessWidget {
                           value: ratio,
                           minHeight: 5,
                           backgroundColor: colors.surfaceContainerHigh,
-                          valueColor: AlwaysStoppedAnimation(
-                            Color(item.color),
-                          ),
+                          valueColor: AlwaysStoppedAnimation(Color(item.color)),
                         ),
                       ),
                     ],
@@ -742,7 +739,7 @@ class _AccountPerformance extends StatelessWidget {
                       Text(
                         '${isPositive ? '+' : '-'}${entry.value.abs().toStringAsFixed(0)} ج.م',
                         style: TextStyle(
-                          color: isPositive ? Colors.green : colors.error,
+                          color: isPositive ? colors.tertiary : colors.error,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -789,10 +786,7 @@ class _RecentReportTransactions extends StatelessWidget {
 
             return Container(
               margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
                 color: colors.surface,
                 borderRadius: BorderRadius.circular(14),
@@ -837,7 +831,7 @@ class _RecentReportTransactions extends StatelessWidget {
                   Text(
                     '${isExpense ? '-' : '+'}${item.transaction.amount.toStringAsFixed(0)} ج.م',
                     style: TextStyle(
-                      color: isExpense ? colors.error : Colors.green,
+                      color: isExpense ? colors.error : colors.tertiary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

@@ -116,7 +116,7 @@ class _TypeButton extends StatelessWidget {
       duration: const Duration(milliseconds: 180),
       height: 44,
       decoration: BoxDecoration(
-        color: selected ? colors.primary : Colors.transparent,
+        color: selected ? colors.primary : colors.surface.withValues(alpha: 0),
         borderRadius: BorderRadius.circular(11),
       ),
       child: InkWell(
@@ -127,9 +127,7 @@ class _TypeButton extends StatelessWidget {
             title,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: selected ? colors.onPrimary : colors.onSurface,
-              fontWeight: selected
-                  ? FontWeight.w700
-                  : FontWeight.w500,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
             ),
           ),
         ),

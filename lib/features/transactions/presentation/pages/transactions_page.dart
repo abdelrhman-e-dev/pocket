@@ -79,12 +79,15 @@ class TransactionsPage extends ConsumerWidget {
                 SliverAppBar(
                   pinned: true,
                   backgroundColor: colors.surface,
-                  surfaceTintColor: Colors.transparent,
+                  surfaceTintColor: colors.surface.withValues(alpha: 0),
                   automaticallyImplyLeading: false,
                   toolbarHeight: 72,
                   titleSpacing: 0,
                   title: Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 12, end: 8),
+                    padding: const EdgeInsetsDirectional.only(
+                      start: 12,
+                      end: 8,
+                    ),
                     child: Row(
                       textDirection: TextDirection.rtl,
                       children: [
@@ -102,7 +105,10 @@ class TransactionsPage extends ConsumerWidget {
                           child: Text(
                             'العمليات',
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 48),
@@ -242,7 +248,7 @@ class _DateSectionHeader extends StatelessWidget {
           '${isPositive ? '+' : ''}${total.toStringAsFixed(0)} ج.م',
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            color: isPositive ? Colors.green : colors.error,
+            color: isPositive ? colors.tertiary : colors.error,
           ),
         ),
       ],
@@ -282,17 +288,17 @@ class _EmptyTransactions extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               'لا توجد عمليات حتى الآن',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'ابدأ بإضافة أول عملية لمتابعة مصروفاتك ودخلك',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
             ),
           ],
         ),

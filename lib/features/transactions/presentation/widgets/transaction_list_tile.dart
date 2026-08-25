@@ -78,10 +78,10 @@ class TransactionListTile extends ConsumerWidget {
             color: colors.error,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
+          child: Icon(Icons.delete_outline_rounded, color: colors.onError),
         ),
         child: Material(
-          color: Colors.transparent,
+          color: colors.surface.withValues(alpha: 0),
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
             onTap: () => context.push('/transactions/details', extra: item),
@@ -138,7 +138,7 @@ class TransactionListTile extends ConsumerWidget {
                   Text(
                     '${isExpense ? '-' : '+'}${transaction.amount.toStringAsFixed(0)} ج.م',
                     style: TextStyle(
-                      color: isExpense ? colors.error : Colors.green,
+                      color: isExpense ? colors.error : colors.tertiary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
