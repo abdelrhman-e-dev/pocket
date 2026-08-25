@@ -148,4 +148,110 @@ appBarTheme: const AppBarTheme(
 
     dividerTheme: const DividerThemeData(color: borderColor, thickness: 1),
   );
+
+  // =========================
+  // Dark Theme
+  // =========================
+
+  static const Color darkBackgroundColor = Color(0xFF051F20);
+  static const Color darkSurfaceColor = Color(0xFF0B2B26);
+  static const Color darkTextColor = Color(0xFFDAF1DE);
+  static const Color darkPrimaryColor = Color(0xFF235347);
+  static const Color darkSecondaryColor = Color(0xFF8EB69B);
+  static const Color darkBorderColor = Color(0xFF163832);
+
+  static ThemeData darkTheme = ThemeData(
+    useMaterial3: true,
+    fontFamily: 'Cairo',
+    colorScheme: ColorScheme.dark(
+      brightness: Brightness.dark,
+      primary: darkPrimaryColor,
+      onPrimary: darkTextColor,
+      secondary: darkSecondaryColor,
+      onSecondary: darkBackgroundColor,
+      primaryContainer: Color(0xFF1F5549),
+      onPrimaryContainer: darkTextColor,
+      surface: darkSurfaceColor,
+      onSurface: darkTextColor,
+      surfaceContainerLowest: darkBackgroundColor,
+      surfaceContainerLow: Color(0xFF0D3230),
+      surfaceContainer: Color(0xFF0F4540),
+      surfaceContainerHigh: darkBorderColor,
+      outline: darkBorderColor,
+      outlineVariant: Color(0xFF2A5A4E),
+      error: errorColor,
+      onError: darkTextColor,
+    ),
+    scaffoldBackgroundColor: darkBackgroundColor,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: darkSurfaceColor,
+      foregroundColor: darkTextColor,
+      centerTitle: true,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: darkSurfaceColor,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+    ),
+    cardTheme: CardThemeData(
+      color: darkSurfaceColor,
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: const BorderSide(color: darkBorderColor),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: darkSurfaceColor,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: darkBorderColor),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: darkBorderColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: darkPrimaryColor, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: errorColor),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: errorColor, width: 2),
+      ),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: darkPrimaryColor,
+        foregroundColor: darkTextColor,
+        minimumSize: const Size(double.infinity, 54),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        textStyle: const TextStyle(
+          fontFamily: 'Cairo',
+          fontWeight: FontWeight.bold,
+          fontSize: 15,
+        ),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: darkPrimaryColor,
+        textStyle: const TextStyle(fontWeight: FontWeight.w600),
+      ),
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: darkPrimaryColor,
+      foregroundColor: darkTextColor,
+    ),
+    dividerTheme: const DividerThemeData(color: darkBorderColor, thickness: 1),
+  );
 }
