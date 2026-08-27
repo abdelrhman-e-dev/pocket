@@ -13,6 +13,7 @@ import '../../providers/dashboard_summary_provider.dart';
 import '../../../../shared/components/navigation/app_bottom_navigation.dart';
 import '../widgets/income_expense_progress.dart';
 import '../../../profile/providers/user_profile_provider.dart';
+import '../../../holdings/providers/holdings_providers.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
@@ -72,6 +73,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     final accounts = ref.watch(dashboardProvider);
     final transactions = ref.watch(recentTransactionsWithDetailsProvider);
     final summary = ref.watch(dashboardSummaryProvider);
+    final holdings = ref.watch(holdingsProvider).valueOrNull ?? const [];
+    final holdingsRate = ref.watch(latestRateProvider).valueOrNull;
     ref.listen(userProfileProvider, (_, next) {
       if (next.hasValue && next.value == null) _showNameDialog();
     });
@@ -109,6 +112,18 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   BalanceCard(total: total),
 
                   const SizedBox(height: 24),
+
+                    _HoldingsNetWorthLine(
+                    value: holdingsRate == null
+                      ? null
+                      : holdings.fold<double>(
+                        0,
+                        (sum, holding) =>
+                          sum + holdingValue(holding, holdingsRate),
+                        ),
+                    ),
+
+                    const SizedBox(height: 24),
 
                   DashboardSummary(
                     expenses: summaryData.expenses,
@@ -163,6 +178,39 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         child: const Icon(Icons.add),
       ),
       bottomNavigationBar: const AppBottomNavigation(),
+    );
+  }
+}
+
+class _HoldingsNetWorthLine extends StatelessWidget {
+  const _HoldingsNetWorthLine({required this.value});
+
+  final double? value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () => context.push('/holdings'),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.savings_outlined, color: colors.secondary),
+            const SizedBox(width: 12),
+            const Expanded(child: Text('قيمة المدخرات (دولار/ذهب)')),
+            Text(
+              value == null ? '—' : '${value!.toStringAsFixed(2)} جنيه',
+              style: TextStyle(fontWeight: FontWeight.bold, color: colors.primary),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

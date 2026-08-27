@@ -18,6 +18,7 @@ import '../../../../shared/components/app_top_bar.dart';
 import '../../providers/reminder_settings_provider.dart';
 import '../../../app_lock/providers/app_lock_provider.dart';
 import '../../../../core/theme/theme_mode_provider.dart';
+import '../../../holdings/providers/holdings_providers.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -102,6 +103,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     ref.invalidate(paginatedTransactionsProvider);
     ref.invalidate(recentTransactionsProvider);
     ref.invalidate(recentTransactionsWithDetailsProvider);
+    ref.invalidate(holdingsProvider);
+    ref.invalidate(latestRateProvider);
   }
 
   void _showMessage(String message) {
@@ -144,6 +147,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               icon: Icons.category_outlined,
               title: 'إدارة التصنيفات',
               onTap: () => context.push('/categories'),
+            ),
+            const SizedBox(height: 12),
+            _SettingsTile(
+              icon: Icons.savings_outlined,
+              title: 'المدخرات بالدولار والذهب',
+              onTap: () => context.push('/holdings'),
             ),
             const SizedBox(height: 12),
             _SettingsTile(
