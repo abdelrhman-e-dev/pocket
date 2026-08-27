@@ -53,6 +53,8 @@ class DataManagementService {
       await _database.delete(_database.transfers).go();
       await _database.delete(_database.categories).go();
       await _database.delete(_database.accounts).go();
+      await _database.delete(_database.holdings).go();
+      await _database.delete(_database.rateSnapshots).go();
     });
   }
 

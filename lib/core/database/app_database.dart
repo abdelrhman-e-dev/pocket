@@ -10,16 +10,26 @@ import 'tables/categories.dart';
 import 'tables/transactions.dart';
 import 'tables/transfers.dart';
 import 'tables/user_profiles.dart';
+import 'tables/holdings.dart';
+import 'tables/rate_snapshots.dart';
 part 'app_database.g.dart';
 
 @DriftDatabase(
-  tables: [Accounts, Categories, Transactions, Transfers, UserProfiles],
+  tables: [
+    Accounts,
+    Categories,
+    Transactions,
+    Transfers,
+    UserProfiles,
+    Holdings,
+    RateSnapshots,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -51,6 +61,11 @@ class AppDatabase extends _$AppDatabase {
             updatedAt: now,
           ),
         );
+      }
+
+      if (from < 3) {
+        await migrator.createTable(holdings);
+        await migrator.createTable(rateSnapshots);
       }
     },
     beforeOpen: (details) async {

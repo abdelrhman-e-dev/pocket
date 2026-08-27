@@ -2311,6 +2311,805 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
   }
 }
 
+class $HoldingsTable extends Holdings with TableInfo<$HoldingsTable, Holding> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HoldingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _goldKaratMeta = const VerificationMeta(
+    'goldKarat',
+  );
+  @override
+  late final GeneratedColumn<int> goldKarat = GeneratedColumn<int>(
+    'gold_karat',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    type,
+    amount,
+    goldKarat,
+    label,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'holdings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Holding> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('gold_karat')) {
+      context.handle(
+        _goldKaratMeta,
+        goldKarat.isAcceptableOrUnknown(data['gold_karat']!, _goldKaratMeta),
+      );
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Holding map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Holding(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount'],
+      )!,
+      goldKarat: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}gold_karat'],
+      ),
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $HoldingsTable createAlias(String alias) {
+    return $HoldingsTable(attachedDatabase, alias);
+  }
+}
+
+class Holding extends DataClass implements Insertable<Holding> {
+  final int id;
+  final String type;
+  final double amount;
+  final int? goldKarat;
+  final String? label;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const Holding({
+    required this.id,
+    required this.type,
+    required this.amount,
+    this.goldKarat,
+    this.label,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['type'] = Variable<String>(type);
+    map['amount'] = Variable<double>(amount);
+    if (!nullToAbsent || goldKarat != null) {
+      map['gold_karat'] = Variable<int>(goldKarat);
+    }
+    if (!nullToAbsent || label != null) {
+      map['label'] = Variable<String>(label);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  HoldingsCompanion toCompanion(bool nullToAbsent) {
+    return HoldingsCompanion(
+      id: Value(id),
+      type: Value(type),
+      amount: Value(amount),
+      goldKarat: goldKarat == null && nullToAbsent
+          ? const Value.absent()
+          : Value(goldKarat),
+      label: label == null && nullToAbsent
+          ? const Value.absent()
+          : Value(label),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory Holding.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Holding(
+      id: serializer.fromJson<int>(json['id']),
+      type: serializer.fromJson<String>(json['type']),
+      amount: serializer.fromJson<double>(json['amount']),
+      goldKarat: serializer.fromJson<int?>(json['goldKarat']),
+      label: serializer.fromJson<String?>(json['label']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'type': serializer.toJson<String>(type),
+      'amount': serializer.toJson<double>(amount),
+      'goldKarat': serializer.toJson<int?>(goldKarat),
+      'label': serializer.toJson<String?>(label),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  Holding copyWith({
+    int? id,
+    String? type,
+    double? amount,
+    Value<int?> goldKarat = const Value.absent(),
+    Value<String?> label = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => Holding(
+    id: id ?? this.id,
+    type: type ?? this.type,
+    amount: amount ?? this.amount,
+    goldKarat: goldKarat.present ? goldKarat.value : this.goldKarat,
+    label: label.present ? label.value : this.label,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  Holding copyWithCompanion(HoldingsCompanion data) {
+    return Holding(
+      id: data.id.present ? data.id.value : this.id,
+      type: data.type.present ? data.type.value : this.type,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      goldKarat: data.goldKarat.present ? data.goldKarat.value : this.goldKarat,
+      label: data.label.present ? data.label.value : this.label,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Holding(')
+          ..write('id: $id, ')
+          ..write('type: $type, ')
+          ..write('amount: $amount, ')
+          ..write('goldKarat: $goldKarat, ')
+          ..write('label: $label, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, type, amount, goldKarat, label, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Holding &&
+          other.id == this.id &&
+          other.type == this.type &&
+          other.amount == this.amount &&
+          other.goldKarat == this.goldKarat &&
+          other.label == this.label &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class HoldingsCompanion extends UpdateCompanion<Holding> {
+  final Value<int> id;
+  final Value<String> type;
+  final Value<double> amount;
+  final Value<int?> goldKarat;
+  final Value<String?> label;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  const HoldingsCompanion({
+    this.id = const Value.absent(),
+    this.type = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.goldKarat = const Value.absent(),
+    this.label = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  HoldingsCompanion.insert({
+    this.id = const Value.absent(),
+    required String type,
+    required double amount,
+    this.goldKarat = const Value.absent(),
+    this.label = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  }) : type = Value(type),
+       amount = Value(amount);
+  static Insertable<Holding> custom({
+    Expression<int>? id,
+    Expression<String>? type,
+    Expression<double>? amount,
+    Expression<int>? goldKarat,
+    Expression<String>? label,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (type != null) 'type': type,
+      if (amount != null) 'amount': amount,
+      if (goldKarat != null) 'gold_karat': goldKarat,
+      if (label != null) 'label': label,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  HoldingsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? type,
+    Value<double>? amount,
+    Value<int?>? goldKarat,
+    Value<String?>? label,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+  }) {
+    return HoldingsCompanion(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      amount: amount ?? this.amount,
+      goldKarat: goldKarat ?? this.goldKarat,
+      label: label ?? this.label,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (goldKarat.present) {
+      map['gold_karat'] = Variable<int>(goldKarat.value);
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HoldingsCompanion(')
+          ..write('id: $id, ')
+          ..write('type: $type, ')
+          ..write('amount: $amount, ')
+          ..write('goldKarat: $goldKarat, ')
+          ..write('label: $label, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $RateSnapshotsTable extends RateSnapshots
+    with TableInfo<$RateSnapshotsTable, RateSnapshot> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RateSnapshotsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _usdToEgpMeta = const VerificationMeta(
+    'usdToEgp',
+  );
+  @override
+  late final GeneratedColumn<double> usdToEgp = GeneratedColumn<double>(
+    'usd_to_egp',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _goldPricePerGram24kMeta =
+      const VerificationMeta('goldPricePerGram24k');
+  @override
+  late final GeneratedColumn<double> goldPricePerGram24k =
+      GeneratedColumn<double>(
+        'gold_price_per_gram24k',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _fetchedAtMeta = const VerificationMeta(
+    'fetchedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fetchedAt = GeneratedColumn<DateTime>(
+    'fetched_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    usdToEgp,
+    goldPricePerGram24k,
+    fetchedAt,
+    source,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'rate_snapshots';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RateSnapshot> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('usd_to_egp')) {
+      context.handle(
+        _usdToEgpMeta,
+        usdToEgp.isAcceptableOrUnknown(data['usd_to_egp']!, _usdToEgpMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_usdToEgpMeta);
+    }
+    if (data.containsKey('gold_price_per_gram24k')) {
+      context.handle(
+        _goldPricePerGram24kMeta,
+        goldPricePerGram24k.isAcceptableOrUnknown(
+          data['gold_price_per_gram24k']!,
+          _goldPricePerGram24kMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_goldPricePerGram24kMeta);
+    }
+    if (data.containsKey('fetched_at')) {
+      context.handle(
+        _fetchedAtMeta,
+        fetchedAt.isAcceptableOrUnknown(data['fetched_at']!, _fetchedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fetchedAtMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  RateSnapshot map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RateSnapshot(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      usdToEgp: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}usd_to_egp'],
+      )!,
+      goldPricePerGram24k: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}gold_price_per_gram24k'],
+      )!,
+      fetchedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fetched_at'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+    );
+  }
+
+  @override
+  $RateSnapshotsTable createAlias(String alias) {
+    return $RateSnapshotsTable(attachedDatabase, alias);
+  }
+}
+
+class RateSnapshot extends DataClass implements Insertable<RateSnapshot> {
+  final int id;
+  final double usdToEgp;
+  final double goldPricePerGram24k;
+  final DateTime fetchedAt;
+  final String source;
+  const RateSnapshot({
+    required this.id,
+    required this.usdToEgp,
+    required this.goldPricePerGram24k,
+    required this.fetchedAt,
+    required this.source,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['usd_to_egp'] = Variable<double>(usdToEgp);
+    map['gold_price_per_gram24k'] = Variable<double>(goldPricePerGram24k);
+    map['fetched_at'] = Variable<DateTime>(fetchedAt);
+    map['source'] = Variable<String>(source);
+    return map;
+  }
+
+  RateSnapshotsCompanion toCompanion(bool nullToAbsent) {
+    return RateSnapshotsCompanion(
+      id: Value(id),
+      usdToEgp: Value(usdToEgp),
+      goldPricePerGram24k: Value(goldPricePerGram24k),
+      fetchedAt: Value(fetchedAt),
+      source: Value(source),
+    );
+  }
+
+  factory RateSnapshot.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RateSnapshot(
+      id: serializer.fromJson<int>(json['id']),
+      usdToEgp: serializer.fromJson<double>(json['usdToEgp']),
+      goldPricePerGram24k: serializer.fromJson<double>(
+        json['goldPricePerGram24k'],
+      ),
+      fetchedAt: serializer.fromJson<DateTime>(json['fetchedAt']),
+      source: serializer.fromJson<String>(json['source']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'usdToEgp': serializer.toJson<double>(usdToEgp),
+      'goldPricePerGram24k': serializer.toJson<double>(goldPricePerGram24k),
+      'fetchedAt': serializer.toJson<DateTime>(fetchedAt),
+      'source': serializer.toJson<String>(source),
+    };
+  }
+
+  RateSnapshot copyWith({
+    int? id,
+    double? usdToEgp,
+    double? goldPricePerGram24k,
+    DateTime? fetchedAt,
+    String? source,
+  }) => RateSnapshot(
+    id: id ?? this.id,
+    usdToEgp: usdToEgp ?? this.usdToEgp,
+    goldPricePerGram24k: goldPricePerGram24k ?? this.goldPricePerGram24k,
+    fetchedAt: fetchedAt ?? this.fetchedAt,
+    source: source ?? this.source,
+  );
+  RateSnapshot copyWithCompanion(RateSnapshotsCompanion data) {
+    return RateSnapshot(
+      id: data.id.present ? data.id.value : this.id,
+      usdToEgp: data.usdToEgp.present ? data.usdToEgp.value : this.usdToEgp,
+      goldPricePerGram24k: data.goldPricePerGram24k.present
+          ? data.goldPricePerGram24k.value
+          : this.goldPricePerGram24k,
+      fetchedAt: data.fetchedAt.present ? data.fetchedAt.value : this.fetchedAt,
+      source: data.source.present ? data.source.value : this.source,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RateSnapshot(')
+          ..write('id: $id, ')
+          ..write('usdToEgp: $usdToEgp, ')
+          ..write('goldPricePerGram24k: $goldPricePerGram24k, ')
+          ..write('fetchedAt: $fetchedAt, ')
+          ..write('source: $source')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, usdToEgp, goldPricePerGram24k, fetchedAt, source);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RateSnapshot &&
+          other.id == this.id &&
+          other.usdToEgp == this.usdToEgp &&
+          other.goldPricePerGram24k == this.goldPricePerGram24k &&
+          other.fetchedAt == this.fetchedAt &&
+          other.source == this.source);
+}
+
+class RateSnapshotsCompanion extends UpdateCompanion<RateSnapshot> {
+  final Value<int> id;
+  final Value<double> usdToEgp;
+  final Value<double> goldPricePerGram24k;
+  final Value<DateTime> fetchedAt;
+  final Value<String> source;
+  const RateSnapshotsCompanion({
+    this.id = const Value.absent(),
+    this.usdToEgp = const Value.absent(),
+    this.goldPricePerGram24k = const Value.absent(),
+    this.fetchedAt = const Value.absent(),
+    this.source = const Value.absent(),
+  });
+  RateSnapshotsCompanion.insert({
+    this.id = const Value.absent(),
+    required double usdToEgp,
+    required double goldPricePerGram24k,
+    required DateTime fetchedAt,
+    required String source,
+  }) : usdToEgp = Value(usdToEgp),
+       goldPricePerGram24k = Value(goldPricePerGram24k),
+       fetchedAt = Value(fetchedAt),
+       source = Value(source);
+  static Insertable<RateSnapshot> custom({
+    Expression<int>? id,
+    Expression<double>? usdToEgp,
+    Expression<double>? goldPricePerGram24k,
+    Expression<DateTime>? fetchedAt,
+    Expression<String>? source,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (usdToEgp != null) 'usd_to_egp': usdToEgp,
+      if (goldPricePerGram24k != null)
+        'gold_price_per_gram24k': goldPricePerGram24k,
+      if (fetchedAt != null) 'fetched_at': fetchedAt,
+      if (source != null) 'source': source,
+    });
+  }
+
+  RateSnapshotsCompanion copyWith({
+    Value<int>? id,
+    Value<double>? usdToEgp,
+    Value<double>? goldPricePerGram24k,
+    Value<DateTime>? fetchedAt,
+    Value<String>? source,
+  }) {
+    return RateSnapshotsCompanion(
+      id: id ?? this.id,
+      usdToEgp: usdToEgp ?? this.usdToEgp,
+      goldPricePerGram24k: goldPricePerGram24k ?? this.goldPricePerGram24k,
+      fetchedAt: fetchedAt ?? this.fetchedAt,
+      source: source ?? this.source,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (usdToEgp.present) {
+      map['usd_to_egp'] = Variable<double>(usdToEgp.value);
+    }
+    if (goldPricePerGram24k.present) {
+      map['gold_price_per_gram24k'] = Variable<double>(
+        goldPricePerGram24k.value,
+      );
+    }
+    if (fetchedAt.present) {
+      map['fetched_at'] = Variable<DateTime>(fetchedAt.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RateSnapshotsCompanion(')
+          ..write('id: $id, ')
+          ..write('usdToEgp: $usdToEgp, ')
+          ..write('goldPricePerGram24k: $goldPricePerGram24k, ')
+          ..write('fetchedAt: $fetchedAt, ')
+          ..write('source: $source')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2319,6 +3118,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TransactionsTable transactions = $TransactionsTable(this);
   late final $TransfersTable transfers = $TransfersTable(this);
   late final $UserProfilesTable userProfiles = $UserProfilesTable(this);
+  late final $HoldingsTable holdings = $HoldingsTable(this);
+  late final $RateSnapshotsTable rateSnapshots = $RateSnapshotsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2329,6 +3130,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     transactions,
     transfers,
     userProfiles,
+    holdings,
+    rateSnapshots,
   ];
 }
 
@@ -4129,6 +4932,428 @@ typedef $$UserProfilesTableProcessedTableManager =
       UserProfile,
       PrefetchHooks Function()
     >;
+typedef $$HoldingsTableCreateCompanionBuilder =
+    HoldingsCompanion Function({
+      Value<int> id,
+      required String type,
+      required double amount,
+      Value<int?> goldKarat,
+      Value<String?> label,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+typedef $$HoldingsTableUpdateCompanionBuilder =
+    HoldingsCompanion Function({
+      Value<int> id,
+      Value<String> type,
+      Value<double> amount,
+      Value<int?> goldKarat,
+      Value<String?> label,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+    });
+
+class $$HoldingsTableFilterComposer
+    extends Composer<_$AppDatabase, $HoldingsTable> {
+  $$HoldingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get goldKarat => $composableBuilder(
+    column: $table.goldKarat,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$HoldingsTableOrderingComposer
+    extends Composer<_$AppDatabase, $HoldingsTable> {
+  $$HoldingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get goldKarat => $composableBuilder(
+    column: $table.goldKarat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$HoldingsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HoldingsTable> {
+  $$HoldingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<int> get goldKarat =>
+      $composableBuilder(column: $table.goldKarat, builder: (column) => column);
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$HoldingsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $HoldingsTable,
+          Holding,
+          $$HoldingsTableFilterComposer,
+          $$HoldingsTableOrderingComposer,
+          $$HoldingsTableAnnotationComposer,
+          $$HoldingsTableCreateCompanionBuilder,
+          $$HoldingsTableUpdateCompanionBuilder,
+          (Holding, BaseReferences<_$AppDatabase, $HoldingsTable, Holding>),
+          Holding,
+          PrefetchHooks Function()
+        > {
+  $$HoldingsTableTableManager(_$AppDatabase db, $HoldingsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$HoldingsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$HoldingsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$HoldingsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<double> amount = const Value.absent(),
+                Value<int?> goldKarat = const Value.absent(),
+                Value<String?> label = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => HoldingsCompanion(
+                id: id,
+                type: type,
+                amount: amount,
+                goldKarat: goldKarat,
+                label: label,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String type,
+                required double amount,
+                Value<int?> goldKarat = const Value.absent(),
+                Value<String?> label = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => HoldingsCompanion.insert(
+                id: id,
+                type: type,
+                amount: amount,
+                goldKarat: goldKarat,
+                label: label,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$HoldingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $HoldingsTable,
+      Holding,
+      $$HoldingsTableFilterComposer,
+      $$HoldingsTableOrderingComposer,
+      $$HoldingsTableAnnotationComposer,
+      $$HoldingsTableCreateCompanionBuilder,
+      $$HoldingsTableUpdateCompanionBuilder,
+      (Holding, BaseReferences<_$AppDatabase, $HoldingsTable, Holding>),
+      Holding,
+      PrefetchHooks Function()
+    >;
+typedef $$RateSnapshotsTableCreateCompanionBuilder =
+    RateSnapshotsCompanion Function({
+      Value<int> id,
+      required double usdToEgp,
+      required double goldPricePerGram24k,
+      required DateTime fetchedAt,
+      required String source,
+    });
+typedef $$RateSnapshotsTableUpdateCompanionBuilder =
+    RateSnapshotsCompanion Function({
+      Value<int> id,
+      Value<double> usdToEgp,
+      Value<double> goldPricePerGram24k,
+      Value<DateTime> fetchedAt,
+      Value<String> source,
+    });
+
+class $$RateSnapshotsTableFilterComposer
+    extends Composer<_$AppDatabase, $RateSnapshotsTable> {
+  $$RateSnapshotsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get usdToEgp => $composableBuilder(
+    column: $table.usdToEgp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get goldPricePerGram24k => $composableBuilder(
+    column: $table.goldPricePerGram24k,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fetchedAt => $composableBuilder(
+    column: $table.fetchedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$RateSnapshotsTableOrderingComposer
+    extends Composer<_$AppDatabase, $RateSnapshotsTable> {
+  $$RateSnapshotsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get usdToEgp => $composableBuilder(
+    column: $table.usdToEgp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get goldPricePerGram24k => $composableBuilder(
+    column: $table.goldPricePerGram24k,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fetchedAt => $composableBuilder(
+    column: $table.fetchedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$RateSnapshotsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RateSnapshotsTable> {
+  $$RateSnapshotsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<double> get usdToEgp =>
+      $composableBuilder(column: $table.usdToEgp, builder: (column) => column);
+
+  GeneratedColumn<double> get goldPricePerGram24k => $composableBuilder(
+    column: $table.goldPricePerGram24k,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get fetchedAt =>
+      $composableBuilder(column: $table.fetchedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+}
+
+class $$RateSnapshotsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $RateSnapshotsTable,
+          RateSnapshot,
+          $$RateSnapshotsTableFilterComposer,
+          $$RateSnapshotsTableOrderingComposer,
+          $$RateSnapshotsTableAnnotationComposer,
+          $$RateSnapshotsTableCreateCompanionBuilder,
+          $$RateSnapshotsTableUpdateCompanionBuilder,
+          (
+            RateSnapshot,
+            BaseReferences<_$AppDatabase, $RateSnapshotsTable, RateSnapshot>,
+          ),
+          RateSnapshot,
+          PrefetchHooks Function()
+        > {
+  $$RateSnapshotsTableTableManager(_$AppDatabase db, $RateSnapshotsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RateSnapshotsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RateSnapshotsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RateSnapshotsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<double> usdToEgp = const Value.absent(),
+                Value<double> goldPricePerGram24k = const Value.absent(),
+                Value<DateTime> fetchedAt = const Value.absent(),
+                Value<String> source = const Value.absent(),
+              }) => RateSnapshotsCompanion(
+                id: id,
+                usdToEgp: usdToEgp,
+                goldPricePerGram24k: goldPricePerGram24k,
+                fetchedAt: fetchedAt,
+                source: source,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required double usdToEgp,
+                required double goldPricePerGram24k,
+                required DateTime fetchedAt,
+                required String source,
+              }) => RateSnapshotsCompanion.insert(
+                id: id,
+                usdToEgp: usdToEgp,
+                goldPricePerGram24k: goldPricePerGram24k,
+                fetchedAt: fetchedAt,
+                source: source,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$RateSnapshotsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RateSnapshotsTable,
+      RateSnapshot,
+      $$RateSnapshotsTableFilterComposer,
+      $$RateSnapshotsTableOrderingComposer,
+      $$RateSnapshotsTableAnnotationComposer,
+      $$RateSnapshotsTableCreateCompanionBuilder,
+      $$RateSnapshotsTableUpdateCompanionBuilder,
+      (
+        RateSnapshot,
+        BaseReferences<_$AppDatabase, $RateSnapshotsTable, RateSnapshot>,
+      ),
+      RateSnapshot,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4143,4 +5368,8 @@ class $AppDatabaseManager {
       $$TransfersTableTableManager(_db, _db.transfers);
   $$UserProfilesTableTableManager get userProfiles =>
       $$UserProfilesTableTableManager(_db, _db.userProfiles);
+  $$HoldingsTableTableManager get holdings =>
+      $$HoldingsTableTableManager(_db, _db.holdings);
+  $$RateSnapshotsTableTableManager get rateSnapshots =>
+      $$RateSnapshotsTableTableManager(_db, _db.rateSnapshots);
 }
