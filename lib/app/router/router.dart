@@ -20,6 +20,9 @@ import '../../features/accounts/presentation/pages/edit_account_page.dart';
 import '../../features/reports/presentation/pages/reports_page.dart';
 import '../../features/categories/presentation/pages/add_edit_category_page.dart';
 import '../../features/categories/presentation/pages/categories_page.dart';
+import '../../features/holdings/presentation/pages/holdings_page.dart';
+import '../../features/holdings/presentation/pages/holding_form_page.dart';
+import '../../features/holdings/presentation/pages/holding_details_page.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: '/',
@@ -42,6 +45,26 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsPage(),
+    ),
+    GoRoute(
+      path: '/holdings',
+      builder: (context, state) => const HoldingsPage(),
+    ),
+    GoRoute(
+      path: '/holdings/add',
+      builder: (context, state) => const HoldingFormPage(),
+    ),
+    GoRoute(
+      path: '/holdings/edit',
+      builder: (context, state) => HoldingFormPage(
+        holding: state.extra as Holding,
+      ),
+    ),
+    GoRoute(
+      path: '/holdings/details',
+      builder: (context, state) => HoldingDetailsPage(
+        holding: state.extra as Holding,
+      ),
     ),
     GoRoute(
       path: '/accounts/details',
